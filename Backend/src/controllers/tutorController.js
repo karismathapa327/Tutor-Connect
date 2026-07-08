@@ -98,22 +98,70 @@ const updateTutorProfile = async (req, res) => {
   }
 };
 
-// Get All Tutors (with subject filter)
+// Get All Tutors (Advanced Search + Pagination)
 const getAllTutors = async (req, res) => {
   try {
 
-    const { subject } = req.query;
+    const {
+      subject,
+      minExperience,
+      maxRate,
+      minRating,
+      page = 1,
+      limit = 10,
+    } = req.query;
 
     let filter = {};
 
+    // Subject
     if (subject) {
-      filter.subjects = { $regex: subject, $options: "i" };
+      filter.subjects = {
+        $regex: subject,
+        $options: "i",
+      };
     }
 
+    // Experience
+    if (minExperience) {
+      filter.experience = {
+        $gte: Number(minExperience),
+      };
+    }
+
+    // Hourly Rate
+    if (maxRate) {
+      filter.hourlyRate = {
+        $lte: Number(maxRate),
+      };
+    }
+
+    // Rating
+    if (minRating) {
+      filter.averageRating = {
+        $gte: Number(minRating),
+      };
+    }
+
+    // Pagination values
+    const currentPage = Number(page);
+    const pageLimit = Number(limit);
+
+    const skip = (currentPage - 1) * pageLimit;
+
+    // Total tutors matching filter
+    const totalTutors = await TutorProfile.countDocuments(filter);
+
+    // Fetch tutors
     const tutors = await TutorProfile.find(filter)
-      .populate("user", "name email");
+      .populate("user", "name email")
+      .skip(skip)
+      .limit(pageLimit)
+      .sort({ averageRating: -1 });
 
     res.status(200).json({
+      currentPage,
+      totalPages: Math.ceil(totalTutors / pageLimit),
+      totalTutors,
       count: tutors.length,
       tutors,
     });

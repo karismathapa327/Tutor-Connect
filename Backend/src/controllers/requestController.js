@@ -155,8 +155,33 @@ const updateRequestStatus = async (req, res) => {
   }
 };
 
+// Student views own requests
+const getStudentRequests = async (req, res) => {
+  try {
+
+    const studentId = req.user.id;
+
+    const requests = await Request.find({
+      student: studentId,
+    })
+      .populate("tutor", "name email")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      count: requests.length,
+      requests,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createRequest,
   getTutorRequests,
   updateRequestStatus,
+  getStudentRequests,
 };

@@ -74,7 +74,7 @@ const createReview = async (req, res) => {
     await TutorProfile.findOneAndUpdate(
         { user: session.tutor },
         {
-            averageRating: averageRating.toFixed(2),
+            averageRating: Number(averageRating.toFixed(2)),
         }
     );
 
@@ -90,6 +90,36 @@ const createReview = async (req, res) => {
   }
 };
 
+// Tutor views received reviews
+const getTutorReviews = async (req, res) => {
+  try {
+
+    const tutorId = req.user.id;
+
+    const reviews = await Review.find({
+      tutor: tutorId,
+    })
+      .populate("student", "name email")
+      .sort({ createdAt: -1 });
+
+    const tutorProfile = await TutorProfile.findOne({
+      user: tutorId,
+    }).select("averageRating");
+
+    res.status(200).json({
+      count: reviews.length,
+      averageRating: tutorProfile ? tutorProfile.averageRating : 0,
+      reviews,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createReview,
+  getTutorReviews,
 };

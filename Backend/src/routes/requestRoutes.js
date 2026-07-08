@@ -4,6 +4,7 @@ const router = express.Router();
 const { createRequest,
         getTutorRequests,
         updateRequestStatus,
+        getStudentRequests,
       } = require("../controllers/requestController");
 
 const protect = require("../middleware/authMiddleware");
@@ -15,6 +16,13 @@ router.post(
   protect,
   authorize("student"),
   createRequest
+);
+
+router.get(
+  "/student",
+  protect,
+  authorize("student"),
+  getStudentRequests
 );
 
 router.get(
