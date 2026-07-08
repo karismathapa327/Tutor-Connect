@@ -7,6 +7,8 @@ const router = express.Router();
 const {
   registerUser,
   loginUser,
+  getProfile,
+  changePassword,
 } = require("../controllers/authController");
 
 const { registerValidation } = require("../validators/authValidator");
@@ -23,12 +25,11 @@ router.post(
 // Login
 router.post("/login", loginUser);
 
-router.get("/profile", protect, (req, res) => {
-  res.json({
-    message: "Protected Profile Route",
-    user: req.user,
-  });
-});
+router.get(
+  "/profile",
+  protect,
+  getProfile
+);
 
 // Student Only
 router.get(
@@ -64,6 +65,12 @@ router.get(
       message: "Welcome Admin!",
     });
   }
+);
+
+router.put(
+  "/change-password",
+  protect,
+  changePassword
 );
 
 module.exports = router;

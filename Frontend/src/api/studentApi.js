@@ -30,3 +30,22 @@ export const createReview = async (reviewData) => {
   return response.data;
 };
 
+export const getStudentDashboard = async () => {
+  const response = await api.get("/student/dashboard");
+  return response.data;
+};
+
+export const getStudentProfile = async () => {
+  const response = await api.get("/auth/profile");
+  return response.data;
+};
+
+// export const changePassword = async (passwordData) => {
+//   const response = await api.put(
+//     "/auth/change-password",
+//     passwordData
+//   );
+
+//   return response.data;
+// };
+
