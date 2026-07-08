@@ -19,3 +19,8 @@ export const getTutorById = async (id) => {
   const response = await api.get(`/tutors/${id}`);
   return response.data;
 };
+
+export const createRequest = async (requestData) => {
+  const response = await api.post("/requests", requestData);
+  return response.data;
+};
