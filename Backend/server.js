@@ -9,6 +9,7 @@ const requestRoutes = require("./src/routes/requestRoutes");
 const sessionRoutes = require("./src/routes/sessionRoutes");
 const reviewRoutes = require("./src/routes/reviewRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
+const studentRoutes = require("./src/routes/studentRoutes");
 const errorHandler = require("./src/middleware/errorMiddleware");
 
 // Load environment variables
@@ -35,6 +36,7 @@ app.use("/api/requests", requestRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/student", studentRoutes);
 
 app.use(errorHandler);
 
