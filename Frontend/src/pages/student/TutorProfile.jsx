@@ -46,6 +46,40 @@ function TutorProfile() {
 
   };
 
+  const handleSubmitRequest = async (e) => {
+    e.preventDefault();
+    
+    try {
+    
+      await createRequest({
+        tutorId: tutor.user._id,
+        subject: formData.subject,
+        topic: formData.topic,
+        preferredDate: formData.preferredDate,
+        preferredTime: formData.preferredTime,
+      });
+    
+      toast.success("Tutoring request sent successfully!");
+    
+      setFormData({
+        subject: "",
+        topic: "",
+        preferredDate: "",
+        preferredTime: "",
+      });
+    
+      setShowForm(false);
+    
+    } catch (error) {
+    
+      toast.error(
+        error.response?.data?.message ||
+        "Failed to send request."
+      );
+    
+    }
+  };
+  
   if (loading) {
     return <h2>Loading...</h2>;
   }
@@ -292,38 +326,5 @@ function TutorProfile() {
     );
 }
 
-const handleSubmitRequest = async (e) => {
-  e.preventDefault();
-
-  try {
-
-    await createRequest({
-      tutorId: tutor.user._id,
-      subject: formData.subject,
-      topic: formData.topic,
-      preferredDate: formData.preferredDate,
-      preferredTime: formData.preferredTime,
-    });
-
-    toast.success("Tutoring request sent successfully!");
-
-    setFormData({
-      subject: "",
-      topic: "",
-      preferredDate: "",
-      preferredTime: "",
-    });
-
-    setShowForm(false);
-
-  } catch (error) {
-
-    toast.error(
-      error.response?.data?.message ||
-      "Failed to send request."
-    );
-
-  }
-};
 
 export default TutorProfile;

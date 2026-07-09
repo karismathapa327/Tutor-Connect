@@ -61,7 +61,7 @@ function TutorDashboard() {
     },
     {
       title: "Upcoming Sessions",
-      value: dashboard.upcomingSessionsList,
+      value: dashboard.upcomingSessions,
       icon: Calendar,
       color: "blue",
     },

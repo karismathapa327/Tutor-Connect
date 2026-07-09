@@ -40,12 +40,12 @@ export const getStudentProfile = async () => {
   return response.data;
 };
 
-// export const changePassword = async (passwordData) => {
-//   const response = await api.put(
-//     "/auth/change-password",
-//     passwordData
-//   );
+export const changePassword = async (passwordData) => {
+  const response = await api.put(
+    "/auth/change-password",
+    passwordData
+  );
 
-//   return response.data;
-// };
+  return response.data;
+};
 

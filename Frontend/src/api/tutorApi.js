@@ -1,12 +1,12 @@
 import api from "./axios";
 
 export const getTutorProfile = async () => {
-  const response = await api.get("/tutor/profile");
+  const response = await api.get("/tutors/profile");
   return response.data;
 };
 
 export const updateTutorProfile = async (data) => {
-  const response = await api.put("/tutor/profile", data);
+  const response = await api.put("/tutors/profile", data);
   return response.data;
 };
 
@@ -50,4 +50,12 @@ export const completeSession = async (
 export const getTutorDashboard = async () => {
   const response = await api.get("/tutor/dashboard");
   return response.data;
+};
+
+export const getMyTutorProfile = async () => {
+
+  const response = await api.get("/tutor-profile");
+
+  return response.data;
+
 };

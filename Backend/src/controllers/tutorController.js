@@ -54,8 +54,8 @@ const createTutorProfile = async (req, res) => {
 const getTutorProfile = asyncHandler(async (req, res) => {
 
     const tutor = await TutorProfile.findOne({
-        user: req.user.id,
-    });
+      user: req.user.id,
+    }).populate("user", "name email role createdAt");
 
     if (!tutor) {
         res.status(404);

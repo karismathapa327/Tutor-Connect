@@ -66,7 +66,7 @@ function App() {
         >
         <Route path="dashboard" element={<TutorDashboard />} />
 
-          <Route path="profile" element={<TutorProfile />} />
+          <Route path="profile" element={<TutorProfiles />} />
           <Route path="requests" element={<TutorRequests />} />
           <Route path="sessions" element={<TutorSessions />} />
           <Route path="reviews" element={<TutorReviews />} />
