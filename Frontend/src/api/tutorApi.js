@@ -5,13 +5,13 @@ export const getTutorProfile = async () => {
   return response.data;
 };
 
-export const updateTutorProfile = async (data) => {
-  const response = await api.put("/tutors/profile", data);
+export const createTutorProfile = async (data) => {
+  const response = await api.post("/tutors/create", data);
   return response.data;
 };
 
-export const createTutorProfile = async (data) => {
-  const response = await api.post("/tutor/profile", data);
+export const updateTutorProfile = async (data) => {
+  const response = await api.put("/tutors/profile", data);
   return response.data;
 };
 
@@ -20,10 +20,7 @@ export const getTutorRequests = async () => {
   return response.data;
 };
 
-export const updateRequestStatus = async (
-  requestId,
-  status
-) => {
+export const updateRequestStatus = async (requestId, status) => {
   const response = await api.put(
     `/requests/${requestId}/status`,
     { status }
@@ -37,9 +34,7 @@ export const getTutorSessions = async () => {
   return response.data;
 };
 
-export const completeSession = async (
-  sessionId
-) => {
+export const completeSession = async (sessionId) => {
   const response = await api.put(
     `/sessions/${sessionId}/complete`
   );
@@ -50,12 +45,4 @@ export const completeSession = async (
 export const getTutorDashboard = async () => {
   const response = await api.get("/tutor/dashboard");
   return response.data;
-};
-
-export const getMyTutorProfile = async () => {
-
-  const response = await api.get("/tutor-profile");
-
-  return response.data;
-
 };

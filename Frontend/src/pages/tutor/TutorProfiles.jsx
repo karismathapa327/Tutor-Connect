@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PageHeader from "../../components/dashboard/PageHeader";
 import StatCard from "../../components/dashboard/StatCard";
 import { Star, MessageSquare, CalendarCheck } from "lucide-react";
-import { getMyTutorProfile, updateTutorProfile, createTutorProfile } from "../../api/tutorApi";
+import { getTutorProfile, updateTutorProfile, createTutorProfile } from "../../api/tutorApi";
 import { toast } from "react-toastify";
 
 function TutorProfiles() {
@@ -26,7 +26,8 @@ function TutorProfiles() {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const data = await getMyTutorProfile();
+      
+      const data = await getTutorProfile();
 
       if (data) {
         setProfile(data);

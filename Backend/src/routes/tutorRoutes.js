@@ -1,26 +1,21 @@
 const express = require("express");
 const router = express.Router();
 
-const { createTutorProfile,
-        getTutorProfile,
-        updateTutorProfile,
-        getAllTutors,
-        getTutorById,
-      } = require("../controllers/tutorController");
+const {
+  createTutorProfile,
+  getTutorProfile,
+  updateTutorProfile,
+  getAllTutors,
+  getTutorById,
+} = require("../controllers/tutorController");
 
 const protect = require("../middleware/authMiddleware");
 const authorize = require("../middleware/roleMidlleware");
 
+// Public tutor list
 router.get("/", protect, getAllTutors);
 
-// Create Tutor Profile
-router.post(
-  "/create",
-  protect,
-  authorize("tutor"),
-  createTutorProfile
-);
-
+// Logged in tutor profile
 router.get(
   "/profile",
   protect,
@@ -28,15 +23,27 @@ router.get(
   getTutorProfile
 );
 
-router.put(
-    "/profile",
-    protect,
-    authorize("tutor"),
-    updateTutorProfile
+// Create profile
+router.post(
+  "/create",
+  protect,
+  authorize("tutor"),
+  createTutorProfile
 );
 
-router.get("/:id", protect, getTutorById);
+// Update profile
+router.put(
+  "/profile",
+  protect,
+  authorize("tutor"),
+  updateTutorProfile
+);
 
-
+// Single tutor
+router.get(
+  "/:id",
+  protect,
+  getTutorById
+);
 
 module.exports = router;

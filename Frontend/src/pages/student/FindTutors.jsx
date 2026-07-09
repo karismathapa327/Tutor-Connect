@@ -27,7 +27,7 @@ function FindTutors() {
 
     //   console.log(data);
 
-      setTutors(data.tutors);
+      setTutors(data);
 
     } catch (error) {
 
@@ -44,13 +44,13 @@ function FindTutors() {
 
   };
 
-    const filteredTutors = tutors.filter((tutor) => {
+    const filteredTutors = tutors.filter((tutors ) => {
       const keyword = search.toLowerCase();
 
       const matchesSearch =
-        tutor.user.name.toLowerCase().includes(keyword) ||
-        tutor.bio.toLowerCase().includes(keyword) ||
-        tutor.subjects.some((subject) =>
+        tutors.user.name.toLowerCase().includes(keyword) ||
+        tutors.bio.toLowerCase().includes(keyword) ||
+        tutors.subjects.some((subject) =>
           subject.toLowerCase().includes(keyword)
         );
 

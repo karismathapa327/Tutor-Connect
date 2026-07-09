@@ -1,210 +1,241 @@
 const TutorProfile = require("../models/TutorProfile");
+const User = require("../models/User");
 const Review = require("../models/Review");
-const asyncHandler = require("express-async-handler");
+const Request = require("../models/Request");
+const Session = require("../models/Session");
 
-// Create Tutor Profile
+
+// CREATE PROFILE
+
 const createTutorProfile = async (req, res) => {
+
   try {
-    const userId = req.user.id;
 
-    const {
-      bio,
-      qualifications,
-      subjects,
-      experience,
-      hourlyRate,
-      availability,
-    } = req.body;
-
-    // Check if profile already exists
-    const existingProfile = await TutorProfile.findOne({
-      user: userId,
+    const existing = await TutorProfile.findOne({
+      user: req.user.id,
     });
 
-    if (existingProfile) {
+    if (existing) {
       return res.status(400).json({
         message: "Tutor profile already exists.",
       });
     }
 
-    // Create profile
-    const tutorProfile = await TutorProfile.create({
-      user: userId,
-      bio,
-      qualifications,
-      subjects,
-      experience,
-      hourlyRate,
-      availability,
+    const profile = await TutorProfile.create({
+
+      user: req.user.id,
+
+      bio: req.body.bio,
+
+      qualifications: req.body.qualifications,
+
+      subjects: req.body.subjects,
+
+      experience: req.body.experience,
+
+      hourlyRate: req.body.hourlyRate,
+
+      availability: req.body.availability,
+
     });
 
-    res.status(201).json({
-      message: "Tutor profile created successfully.",
-      tutorProfile,
-    });
+    res.status(201).json(profile);
 
-  } catch (error) {
+  }
+
+  catch (error) {
+
     res.status(500).json({
       message: error.message,
     });
+
   }
+
 };
 
-// Get Tutor Profile
-const getTutorProfile = asyncHandler(async (req, res) => {
 
-    const tutor = await TutorProfile.findOne({
-      user: req.user.id,
-    }).populate("user", "name email role createdAt");
+// GET MY PROFILE
 
-    if (!tutor) {
-        res.status(404);
-        throw new Error("Tutor profile not found.");
-    }
-
-    res.json(tutor);
-
-});
-
-// Update Tutor Profile
-const updateTutorProfile = async (req, res) => {
+const getTutorProfile = async (req, res) => {
   try {
+
     const userId = req.user.id;
 
-    const updatedProfile = await TutorProfile.findOneAndUpdate(
-      { user: userId },     // Find profile by logged-in user
-      req.body,             // New data from request
-      {
-        returnDocument: true,          // Return updated document
-        runValidators: true // Apply schema validation
-      }
-    ).populate("user", "name email role");
+    const user = await User.findById(userId).select("-password");
 
-    if (!updatedProfile) {
+    if (!user) {
       return res.status(404).json({
-        message: "Tutor profile not found."
+        message: "User not found.",
       });
     }
 
+    const profile = await TutorProfile.findOne({
+      user: userId,
+    });
+
+    if (!profile) {
+      return res.status(404).json({
+        message: "Tutor profile not found.",
+      });
+    }
+
+    const totalReviews = await Review.countDocuments({
+      tutor: userId,
+    });
+
+    const pendingRequests = await Request.countDocuments({
+      tutor: userId,
+      status: "Pending",
+    });
+
+    const upcomingSessions = await Session.countDocuments({
+      tutor: userId,
+      status: "Upcoming",
+    });
+
+    const completedSessions = await Session.countDocuments({
+      tutor: userId,
+      status: "Completed",
+    });
+
     res.status(200).json({
-      message: "Tutor profile updated successfully.",
-      tutorProfile: updatedProfile
+
+      _id: profile._id,
+
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      memberSince: user.createdAt,
+
+      bio: profile.bio,
+      qualifications: profile.qualifications,
+      subjects: profile.subjects,
+      experience: profile.experience,
+      hourlyRate: profile.hourlyRate,
+      availability: profile.availability,
+      averageRating: profile.averageRating,
+
+      totalReviews,
+      pendingRequests,
+      upcomingSessions,
+      completedSessions,
+
     });
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    });
-  }
-};
 
-// Get All Tutors (Advanced Search + Pagination)
-const getAllTutors = async (req, res) => {
-  try {
-
-    const {
-      subject,
-      minExperience,
-      maxRate,
-      minRating,
-      page = 1,
-      limit = 10,
-    } = req.query;
-
-    let filter = {};
-
-    // Subject
-    if (subject) {
-      filter.subjects = {
-        $regex: subject,
-        $options: "i",
-      };
-    }
-
-    // Experience
-    if (minExperience) {
-      filter.experience = {
-        $gte: Number(minExperience),
-      };
-    }
-
-    // Hourly Rate
-    if (maxRate) {
-      filter.hourlyRate = {
-        $lte: Number(maxRate),
-      };
-    }
-
-    // Rating
-    if (minRating) {
-      filter.averageRating = {
-        $gte: Number(minRating),
-      };
-    }
-
-    // Pagination values
-    const currentPage = Number(page);
-    const pageLimit = Number(limit);
-
-    const skip = (currentPage - 1) * pageLimit;
-
-    // Total tutors matching filter
-    const totalTutors = await TutorProfile.countDocuments(filter);
-
-    // Fetch tutors
-    const tutors = await TutorProfile.find(filter)
-      .populate("user", "name email")
-      .skip(skip)
-      .limit(pageLimit)
-      .sort({ averageRating: -1 });
-
-    res.status(200).json({
-      currentPage,
-      totalPages: Math.ceil(totalTutors / pageLimit),
-      totalTutors,
-      count: tutors.length,
-      tutors,
-    });
-
-  } catch (error) {
     res.status(500).json({
       message: error.message,
     });
+
   }
 };
 
-// Get Single Tutor Profile
+
+// UPDATE PROFILE
+
+const updateTutorProfile = async (req, res) => {
+
+  try {
+
+    const profile = await TutorProfile.findOneAndUpdate(
+
+      {
+        user: req.user.id,
+      },
+
+      req.body,
+
+      {
+        new: true,
+        runValidators: true,
+      }
+
+    );
+
+    if (!profile) {
+
+      return res.status(404).json({
+        message: "Tutor profile not found.",
+      });
+
+    }
+
+    res.json(profile);
+
+  }
+
+  catch (error) {
+
+    res.status(500).json({
+      message: error.message,
+    });
+
+  }
+
+};
+
+
+// GET ALL TUTORS
+
+const getAllTutors = async (req, res) => {
+
+  const tutors = await TutorProfile.find()
+    .populate("user", "name email");
+
+  res.json(tutors);
+
+};
+
+
+// GET SINGLE TUTOR
+
 const getTutorById = async (req, res) => {
+
   try {
 
     const tutor = await TutorProfile.findById(req.params.id)
-      .populate("user", "name email role");
+      .populate("user", "name email");
 
     if (!tutor) {
+
       return res.status(404).json({
-        message: "Tutor not found."
+        message: "Tutor not found.",
       });
+
     }
+
     const reviews = await Review.find({
-        tutor: tutor.user._id
+      tutor: tutor.user._id,
     }).populate("student", "name");
 
-    res.status(200).json({tutor, reviews});
-
-  } catch (error) {
-    res.status(500).json({
-      message: error.message
+    res.json({
+      tutor,
+      reviews,
     });
+
   }
+
+  catch (error) {
+
+    res.status(500).json({
+      message: error.message,
+    });
+
+  }
+
 };
 
-
-
-
 module.exports = {
+
   createTutorProfile,
+
   getTutorProfile,
+
   updateTutorProfile,
+
   getAllTutors,
+
   getTutorById,
+
 };
