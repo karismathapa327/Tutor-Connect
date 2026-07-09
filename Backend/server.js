@@ -37,7 +37,10 @@ app.use("/api/sessions", sessionRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/student", studentRoutes);
-
+app.use(
+  "/api/tutor/dashboard",
+  require("./src/routes/tutorDashboardRoutes")
+);
 app.use(errorHandler);
 
 // Test Route

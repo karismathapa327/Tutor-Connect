@@ -17,6 +17,12 @@ import StudentProfile from "./pages/student/StudentProfile";
 import StudentSettings from "./pages/student/StudentSettings";
 import TutorProfile from "./pages/student/TutorProfile";
 
+import TutorRequests from "./pages/tutor/TutorRequests";
+import TutorSessions from "./pages/tutor/TutorSessions";
+import TutorSettings from "./pages/tutor/TutorSettings";
+import TutorProfiles from "./pages/tutor/TutorProfiles";
+import TutorReviews from "./pages/tutor/TutotReviews";
+
 function App() {
   return (
     <BrowserRouter>
@@ -51,14 +57,21 @@ function App() {
         </Route>
         
         <Route
-          path="/tutor/dashboard"
+          path="/tutor"
           element={
             <ProtectedRoute allowedRole="tutor">
               <DashboardLayout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<TutorDashboard />} />
+        <Route path="dashboard" element={<TutorDashboard />} />
+
+          <Route path="profile" element={<TutorProfile />} />
+          <Route path="requests" element={<TutorRequests />} />
+          <Route path="sessions" element={<TutorSessions />} />
+          <Route path="reviews" element={<TutorReviews />} />
+          <Route path="settings" element={<TutorSettings />} />
+
         </Route>
         
         <Route
