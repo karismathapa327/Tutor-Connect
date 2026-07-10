@@ -21,7 +21,13 @@ import TutorRequests from "./pages/tutor/TutorRequests";
 import TutorSessions from "./pages/tutor/TutorSessions";
 import TutorSettings from "./pages/tutor/TutorSettings";
 import TutorProfiles from "./pages/tutor/TutorProfiles";
-import TutorReviews from "./pages/tutor/TutotReviews";
+import TutorReviews from "./pages/tutor/TutorReviews";
+
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminTutors from "./pages/admin/AdminTutors";
+import AdminSessions from "./pages/admin/AdminSessions";
+import AdminReviews from "./pages/admin/AdminReviews";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 function App() {
   return (
@@ -69,13 +75,13 @@ function App() {
           <Route path="profile" element={<TutorProfiles />} />
           <Route path="requests" element={<TutorRequests />} />
           <Route path="sessions" element={<TutorSessions />} />
-          <Route path="reviews" element={<TutorReviews />} />
+          <Route path="subjects" element={<TutorReviews />} />
           <Route path="settings" element={<TutorSettings />} />
 
         </Route>
         
         <Route
-          path="/admin/dashboard"
+          path="/admin"
           element={
             <ProtectedRoute allowedRole="admin">
               <DashboardLayout />
@@ -83,6 +89,11 @@ function App() {
           }
         >
           <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="tutors" element={<AdminTutors />} />
+          <Route path="students" element={<AdminSessions />} />
+          <Route path="reports" element={<AdminReviews />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
         
       </Routes>

@@ -46,3 +46,8 @@ export const getTutorDashboard = async () => {
   const response = await api.get("/tutor/dashboard");
   return response.data;
 };
+
+export const getTutorReviews = async () => {
+  const response = await api.get("/tutors/reviews");
+  return response.data;
+};

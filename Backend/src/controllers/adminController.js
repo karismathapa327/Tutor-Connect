@@ -70,26 +70,67 @@ const getDashboardStats = async (req, res) => {
       status: "Pending",
     });
 
+    const acceptedRequests = await Request.countDocuments({
+      status: "Accepted",
+    });
+
+    const rejectedRequests = await Request.countDocuments({
+      status: "Rejected",
+    });
+
     const totalSessions = await Session.countDocuments();
+
+    const upcomingSessions = await Session.countDocuments({
+      status: "Upcoming",
+    });
+
+    const cancelledSessions = await Session.countDocuments({
+      status: "Cancelled",
+    });
+
+
 
     const completedSessions = await Session.countDocuments({
       status: "Completed",
     });
 
+    const ratingStats = await Review.aggregate([
+      {
+        $group: {
+          _id: null,
+          averageRating: { $avg: "$rating" },
+        },
+      },
+    ]);
+
     const totalReviews = await Review.countDocuments();
 
-    res.status(200).json({
-      totalUsers,
-      totalStudents,
-      totalTutors,
-      totalAdmins,
-      totalTutorProfiles,
-      totalRequests,
-      pendingRequests,
-      totalSessions,
-      completedSessions,
-      totalReviews,
-    });
+    const averageRating =
+      ratingStats.length > 0
+        ? Number(ratingStats[0].averageRating.toFixed(1))
+        : 0;
+
+      res.status(200).json({
+        totalUsers,
+        totalStudents,
+        totalTutors,
+        totalAdmins,
+      
+        totalTutorProfiles,
+      
+        totalRequests,
+        pendingRequests,
+        acceptedRequests,
+        rejectedRequests,
+      
+        totalSessions,
+        upcomingSessions,
+        completedSessions,
+        cancelledSessions,
+      
+        totalReviews,
+        averageRating,
+      });
 
   } catch (error) {
     res.status(500).json({
@@ -140,10 +181,35 @@ const getAllReviews = async (req, res) => {
   }
 }; 
 
+// Admin deletes a user
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    await user.deleteOne();
+
+    res.status(200).json({
+      message: "User deleted successfully",
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
     getAllUsers,
     getAllTutors,
     getDashboardStats,
     getAllSessions,
     getAllReviews,
+    deleteUser,
 }

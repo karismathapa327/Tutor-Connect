@@ -226,6 +226,30 @@ const getTutorById = async (req, res) => {
 
 };
 
+// GET MY REVIEWS
+
+const getTutorReviews = async (req, res) => {
+  try {
+
+    const reviews = await Review.find({
+      tutor: req.user.id,
+    })
+      .populate("student", "name")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      reviews,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: error.message,
+    });
+
+  }
+};
+
 module.exports = {
 
   createTutorProfile,
@@ -237,5 +261,7 @@ module.exports = {
   getAllTutors,
 
   getTutorById,
+
+  getTutorReviews,
 
 };

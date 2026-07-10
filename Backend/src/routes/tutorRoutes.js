@@ -7,6 +7,7 @@ const {
   updateTutorProfile,
   getAllTutors,
   getTutorById,
+  getTutorReviews,
 } = require("../controllers/tutorController");
 
 const protect = require("../middleware/authMiddleware");
@@ -21,6 +22,13 @@ router.get(
   protect,
   authorize("tutor"),
   getTutorProfile
+);
+
+router.get(
+  "/reviews",
+  protect,
+  authorize("tutor"),
+  getTutorReviews
 );
 
 // Create profile
