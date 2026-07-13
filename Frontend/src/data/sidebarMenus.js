@@ -94,9 +94,9 @@ export const sidebarMenus = {
       path: "/admin/tutors",
     },
     {
-      title: "Students",
+      title: "Sessions",
       icon: User,
-      path: "/admin/students",
+      path: "/admin/sessions",
     },
     {
       title: "Reports",

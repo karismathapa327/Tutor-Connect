@@ -88,10 +88,10 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="tutors" element={<AdminTutors />} />
-          <Route path="students" element={<AdminSessions />} />
+          <Route path="sessions" element={<AdminSessions />} />
           <Route path="reports" element={<AdminReviews />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
