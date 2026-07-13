@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { UserRound } from "lucide-react";
 import Button from "../common/Button";
 
 function Hero() {
@@ -89,7 +90,6 @@ function Hero() {
             <div className="text-center">
 
               <div className="text-8xl">
-                👩‍🏫
               </div>
 
               <h2 className="text-2xl font-bold mt-4">

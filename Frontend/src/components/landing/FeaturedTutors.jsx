@@ -1,3 +1,4 @@
+import { User } from "lucide-react";
 import Button from "../common/Button";
 
 function FeaturedTutors() {
@@ -59,7 +60,7 @@ function FeaturedTutors() {
             >
 
               <div className="w-24 h-24 rounded-full bg-blue-100 mx-auto flex items-center justify-center text-4xl">
-                👨‍🏫
+                <User className="w-10 h-10"></User>
               </div>
 
               <h3 className="text-2xl font-bold text-center mt-6">
