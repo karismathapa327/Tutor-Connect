@@ -37,4 +37,7 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+reviewSchema.index({ tutor: 1, rating: -1 });
+reviewSchema.index({ tutor: 1, createdAt: -1 });
+
 module.exports = mongoose.model("Review", reviewSchema);

@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import PageHeader from "../../components/dashboard/PageHeader";
 import EmptyState from "../../components/dashboard/EmptyState";
 import RequestCard from "../../components/tutor/RequestCard";
+import { TableSkeleton } from "../../components/common/Skeleton";
 
 import { MessageSquare } from "lucide-react";
 
@@ -71,7 +72,12 @@ function TutorRequests() {
   };
 
   if (loading) {
-    return <h2>Loading...</h2>;
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Tutoring Requests" subtitle="Accept or reject incoming tutoring requests." />
+        <TableSkeleton rows={5} />
+      </div>
+    );
   }
 
   return (

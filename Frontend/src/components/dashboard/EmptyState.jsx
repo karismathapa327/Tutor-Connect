@@ -6,38 +6,41 @@ function EmptyState({
   description,
   buttonText,
   buttonLink,
+  onButtonClick,
 }) {
   return (
-    <div className="flex flex-col items-center justify-center text-center py-12">
-
+    <div className="flex flex-col items-center justify-center text-center py-12 px-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm my-4">
       {Icon && (
-        <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-5">
-
-          <Icon
-            size={36}
-            className="text-blue-600"
-          />
-
+        <div className="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center mb-4 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40">
+          <Icon size={32} />
         </div>
       )}
 
-      <h3 className="text-xl font-semibold text-slate-800">
+      <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">
         {title}
       </h3>
 
-      <p className="text-slate-500 mt-3 max-w-sm">
+      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-md leading-relaxed">
         {description}
       </p>
 
       {buttonText && buttonLink && (
         <Link
           to={buttonLink}
-          className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+          className="mt-5 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl transition shadow-md shadow-indigo-600/20"
         >
           {buttonText}
         </Link>
       )}
 
+      {buttonText && onButtonClick && (
+        <button
+          onClick={onButtonClick}
+          className="mt-5 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl transition shadow-md shadow-indigo-600/20"
+        >
+          {buttonText}
+        </button>
+      )}
     </div>
   );
 }

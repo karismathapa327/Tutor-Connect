@@ -8,6 +8,14 @@ import {
   BookOpen,
   Users,
   BarChart3,
+  Heart,
+  FileText,
+  CreditCard,
+  Award,
+  ShieldCheck,
+  Star,
+  Clock,
+  Bell,
 } from "lucide-react";
 
 export const sidebarMenus = {
@@ -23,6 +31,11 @@ export const sidebarMenus = {
       path: "/student/tutors",
     },
     {
+      title: "Favorites",
+      icon: Heart,
+      path: "/student/favorites",
+    },
+    {
       title: "Sessions",
       icon: Calendar,
       path: "/student/sessions",
@@ -31,6 +44,26 @@ export const sidebarMenus = {
       title: "Requests",
       icon: MessageSquare,
       path: "/student/requests",
+    },
+    {
+      title: "Resources",
+      icon: FileText,
+      path: "/student/resources",
+    },
+    {
+      title: "Payments",
+      icon: CreditCard,
+      path: "/student/payments",
+    },
+    {
+      title: "Certificates",
+      icon: Award,
+      path: "/student/certificates",
+    },
+    {
+      title: "Notifications",
+      icon: Bell,
+      path: "/student/notifications",
     },
     {
       title: "Profile",
@@ -51,11 +84,6 @@ export const sidebarMenus = {
       path: "/tutor/dashboard",
     },
     {
-      title: "Subjects",
-      icon: BookOpen,
-      path: "/tutor/subjects",
-    },
-    {
       title: "Sessions",
       icon: Calendar,
       path: "/tutor/sessions",
@@ -66,9 +94,34 @@ export const sidebarMenus = {
       path: "/tutor/requests",
     },
     {
-      title: "Profile",
-      icon: User,
+      title: "Availability",
+      icon: Clock,
+      path: "/tutor/availability",
+    },
+    {
+      title: "Resources",
+      icon: FileText,
+      path: "/tutor/resources",
+    },
+    {
+      title: "Payments",
+      icon: CreditCard,
+      path: "/tutor/payments",
+    },
+    {
+      title: "Reviews",
+      icon: Star,
+      path: "/tutor/subjects",
+    },
+    {
+      title: "Profile & Verification",
+      icon: ShieldCheck,
       path: "/tutor/profile",
+    },
+    {
+      title: "Notifications",
+      icon: Bell,
+      path: "/tutor/notifications",
     },
     {
       title: "Settings",
@@ -95,13 +148,23 @@ export const sidebarMenus = {
     },
     {
       title: "Sessions",
-      icon: User,
+      icon: Calendar,
       path: "/admin/sessions",
     },
     {
-      title: "Reports",
+      title: "Payments",
+      icon: CreditCard,
+      path: "/admin/payments",
+    },
+    {
+      title: "Reports & Reviews",
       icon: BarChart3,
       path: "/admin/reports",
+    },
+    {
+      title: "Notifications",
+      icon: Bell,
+      path: "/admin/notifications",
     },
     {
       title: "Settings",

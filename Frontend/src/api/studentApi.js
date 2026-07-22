@@ -1,18 +1,23 @@
 import api from "./axios";
 
-export const getTutors = async () => {
-  const response = await api.get("/tutors");
+export const getTutors = async (params = {}) => {
+  const response = await api.get("/tutors", { params });
   return response.data;
 };
 
-export const getSessions = async () => {
-  const response = await api.get("/sessions/student");
+export const getSessions = async (params = {}) => {
+  const response = await api.get("/sessions/student", { params });
   return response.data;
 };
 
-export const getRequests = async () => {
-    const response = await api.get("/requests/student");
-    return response.data;
+export const cancelSession = async (sessionId) => {
+  const response = await api.put(`/sessions/${sessionId}/cancel`);
+  return response.data;
+};
+
+export const getRequests = async (params = {}) => {
+  const response = await api.get("/requests/student", { params });
+  return response.data;
 };
 
 export const getTutorById = async (id) => {
@@ -41,11 +46,6 @@ export const getStudentProfile = async () => {
 };
 
 export const changePassword = async (passwordData) => {
-  const response = await api.put(
-    "/auth/change-password",
-    passwordData
-  );
-
+  const response = await api.put("/auth/change-password", passwordData);
   return response.data;
 };
-

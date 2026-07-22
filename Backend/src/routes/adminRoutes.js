@@ -8,52 +8,24 @@ const {
   getAllSessions,
   getAllReviews,
   deleteUser,
+  getPendingVerifications,
+  updateVerificationStatus,
 } = require("../controllers/adminController");
 
 const protect = require("../middleware/authMiddleware");
 const authorize = require("../middleware/roleMidlleware");
 
-// Admin views all users
-router.get(
-  "/users",
-  protect,
-  authorize("admin"),
-  getAllUsers
-);
+router.use(protect, authorize("admin"));
 
-router.get(
-  "/tutors",
-  protect,
-  authorize("admin"),
-  getAllTutors
-);
+router.get("/users", getAllUsers);
+router.get("/tutors", getAllTutors);
+router.get("/statistics", getDashboardStats);
+router.get("/sessions", getAllSessions);
+router.get("/reviews", getAllReviews);
+router.delete("/users/:id", deleteUser);
 
-router.get(
-  "/statistics",
-  protect,
-  authorize("admin"),
-  getDashboardStats
-);
-
-router.get(
-  "/sessions",
-  protect,
-  authorize("admin"),
-  getAllSessions
-);
-
-router.get(
-  "/reviews",
-  protect,
-  authorize("admin"),
-  getAllReviews
-);
-
-router.delete(
-  "/users/:id",
-  protect,
-  authorize("admin"),
-  deleteUser
-);
+// Verification routes
+router.get("/verifications", getPendingVerifications);
+router.patch("/verifications/:profileId", updateVerificationStatus);
 
 module.exports = router;

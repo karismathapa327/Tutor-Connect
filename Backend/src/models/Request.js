@@ -47,4 +47,7 @@ const requestSchema = new mongoose.Schema(
   }
 );
 
+requestSchema.index({ student: 1, status: 1 });
+requestSchema.index({ tutor: 1, status: 1 });
+
 module.exports = mongoose.model("Request", requestSchema);

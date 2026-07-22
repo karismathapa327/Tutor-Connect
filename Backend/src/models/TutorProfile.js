@@ -41,14 +41,43 @@ const tutorProfileSchema = new mongoose.Schema(
     availability: [
       {
         day: String,
+        date: String,
         startTime: String,
         endTime: String,
+        isBooked: {
+          type: Boolean,
+          default: false,
+        },
+        bookedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          default: null,
+        },
       },
     ],
 
     averageRating: {
       type: Number,
       default: 0,
+    },
+
+    verificationStatus: {
+      type: String,
+      enum: ["Unverified", "Pending", "Approved", "Rejected"],
+      default: "Unverified",
+    },
+
+    verificationDocs: [
+      {
+        docType: { type: String, required: true },
+        docUrl: { type: String, required: true },
+        uploadedAt: { type: Date, default: Date.now },
+      },
+    ],
+
+    verificationNote: {
+      type: String,
+      default: "",
     },
   },
   {

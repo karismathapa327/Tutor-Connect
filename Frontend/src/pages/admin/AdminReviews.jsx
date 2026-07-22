@@ -1,272 +1,123 @@
 import { useEffect, useState } from "react";
-import {
-  Search,
-  Loader2,
-  MessageSquare,
-  Star,
-} from "lucide-react";
-
+import { Star, MessageSquare, Search } from "lucide-react";
 import { getReviews } from "../../api/adminApi";
+import PageHeader from "../../components/dashboard/PageHeader";
+import ReusableTable from "../../components/common/ReusableTable";
+import { downloadCSV } from "../../utils/exportCSV";
 
 function AdminReviews() {
   const [reviews, setReviews] = useState([]);
-  const [filteredReviews, setFilteredReviews] = useState([]);
-
   const [search, setSearch] = useState("");
-
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const LIMIT = 10;
 
   useEffect(() => {
     fetchReviews();
-  }, []);
-
-  useEffect(() => {
-    const filtered = reviews.filter((review) => {
-      return (
-        review.student?.name
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-
-        review.tutor?.name
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-
-        review.review
-          ?.toLowerCase()
-          .includes(search.toLowerCase())
-      );
-    });
-
-    setFilteredReviews(filtered);
-  }, [search, reviews]);
+  }, [page, search]);
 
   const fetchReviews = async () => {
     try {
       setLoading(true);
       setError("");
-
-      const { data } = await getReviews();
-
-      setReviews(data.reviews);
-      setFilteredReviews(data.reviews);
-
+      const { data } = await getReviews({ search, page, limit: LIMIT });
+      setReviews(data.reviews || []);
+      setTotalPages(data.totalPages || 1);
     } catch (err) {
-
       console.error(err);
       setError("Failed to load reviews.");
-
     } finally {
-
       setLoading(false);
-
     }
   };
 
   const renderStars = (rating) => {
-
     return (
-
-      <div className="flex justify-center gap-1">
-
-        {[1,2,3,4,5].map((star) => (
-
-          <Star
-            key={star}
-            size={16}
-            className={
-              star <= rating
-                ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-300"
-            }
-          />
-
+      <div className="flex gap-1 justify-center">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star key={star} size={16} className={star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"} />
         ))}
-
       </div>
-
     );
-
   };
 
-  if (loading) {
+  const columns = [
+    { key: "student.name", label: "Student", render: (val) => val || "—" },
+    { key: "tutor.name", label: "Tutor", render: (val) => val || "—" },
+    {
+      key: "rating",
+      label: "Rating",
+      render: (rating) => renderStars(rating),
+    },
+    { key: "review", label: "Review" },
+    {
+      key: "createdAt",
+      label: "Date",
+      render: (val) => (val ? new Date(val).toLocaleDateString() : "—"),
+    },
+  ];
+
+  const handleExport = () => {
+    downloadCSV(reviews, "reviews", columns);
+  };
+
+  if (loading && reviews.length === 0) {
     return (
-      <div className="flex justify-center items-center h-80">
-        <Loader2
-          className="animate-spin text-blue-600"
-          size={45}
-        />
+      <div className="space-y-6">
+        <PageHeader title="All Reviews" subtitle="Monitor all platform reviews and ratings." />
+        <ReusableTable columns={columns} data={[]} loading />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-
-        <h2 className="text-2xl font-bold text-red-600">
-          Something went wrong
-        </h2>
-
-        <p className="mt-3">
-          {error}
-        </p>
-
-        <button
-          onClick={fetchReviews}
-          className="mt-5 bg-red-600 text-white px-5 py-2 rounded-lg"
-        >
+      <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6">
+        <h2 className="text-2xl font-bold text-rose-600">Something went wrong</h2>
+        <p className="mt-3 text-slate-600">{error}</p>
+        <button onClick={fetchReviews} className="mt-5 bg-rose-600 text-white px-5 py-2 rounded-lg hover:bg-rose-700">
           Try Again
         </button>
-
       </div>
     );
   }
 
   return (
+    <div className="space-y-6">
+      <PageHeader title="All Reviews" subtitle={`Total Reviews: ${reviews.length > 0 ? "showing paginated results" : "0"}`} />
 
-    <div>
-
-      {/* Header */}
-
-      <div className="flex justify-between items-center mb-8">
-
-        <div>
-
-          <h1 className="text-3xl font-bold">
-            Reviews
-          </h1>
-
-          <p className="text-gray-500 mt-2">
-            Total Reviews : {reviews.length}
-          </p>
-
-        </div>
-
-      </div>
-
-      {/* Search */}
-
-      <div className="relative mb-6">
-
-        <Search
-          className="absolute left-4 top-3.5 text-gray-400"
-          size={20}
-        />
-
-        <input
-          type="text"
-          placeholder="Search reviews..."
-          className="w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500"
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-        />
-
-      </div>
-
-      {/* Empty State */}
-
-      {filteredReviews.length === 0 ? (
-
-        <div className="bg-white rounded-xl shadow p-12 text-center">
-
-          <MessageSquare
-            size={70}
-            className="mx-auto text-gray-300"
+      <div className="flex items-center justify-between">
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-3.5 text-slate-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search reviews..."
+            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
-
-          <h2 className="text-2xl font-bold mt-4">
-            No Reviews Found
-          </h2>
-
-          <p className="text-gray-500 mt-2">
-            Try another search.
-          </p>
-
         </div>
+        <button onClick={handleExport} className="ml-4 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+          Export CSV
+        </button>
+      </div>
 
-      ) : (
-
-        <div className="bg-white rounded-xl shadow overflow-x-auto">
-
-          <table className="w-full">
-
-            <thead className="bg-slate-100">
-
-              <tr>
-
-                <th className="text-left p-4">
-                  Student
-                </th>
-
-                <th className="text-left p-4">
-                  Tutor
-                </th>
-
-                <th className="text-center p-4">
-                  Rating
-                </th>
-
-                <th className="text-left p-4">
-                  Review
-                </th>
-
-                <th className="text-center p-4">
-                  Date
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {filteredReviews.map((review) => (
-
-                <tr
-                  key={review._id}
-                  className="border-b hover:bg-slate-50"
-                >
-
-                  <td className="p-4">
-                    {review.student?.name}
-                  </td>
-
-                  <td className="p-4">
-                    {review.tutor?.name}
-                  </td>
-
-                  <td className="p-4 text-center">
-                    {renderStars(review.rating)}
-                  </td>
-
-                  <td className="p-4 max-w-sm">
-                    {review.review}
-                  </td>
-
-                  <td className="p-4 text-center">
-                    {new Date(
-                      review.createdAt
-                    ).toLocaleDateString()}
-                  </td>
-
-                </tr>
-
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      )}
-
+      <ReusableTable
+        columns={columns}
+        data={reviews}
+        loading={loading}
+        emptyIcon={MessageSquare}
+        emptyTitle="No Reviews Found"
+        emptyDescription="Try another search keyword."
+        showPagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     </div>
-
   );
 }
 

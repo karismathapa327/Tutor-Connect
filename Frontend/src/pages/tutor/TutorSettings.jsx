@@ -3,9 +3,9 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/dashboard/PageHeader";
 import { changePassword } from "../../api/authApi";
-// Note: Adjust this import path if your tutor profile fetch API is located in a different file
-import { getTutorProfile } from "../../api/tutorApi"; 
+import { getTutorProfile } from "../../api/tutorApi";
 import useAuth from "../../hooks/useAuth";
+import { User, Lock, LogOut } from "lucide-react";
 
 function TutorSettings() {
   const navigate = useNavigate();
@@ -25,7 +25,6 @@ function TutorSettings() {
 
   const fetchProfile = async () => {
     try {
-      // Fetches the logged-in tutor's basic account info
       const data = await getTutorProfile();
       setProfile(data);
     } catch (error) {
@@ -76,98 +75,102 @@ function TutorSettings() {
   };
 
   if (loading || !profile) {
-    return <h2 className="text-center mt-10 text-gray-500 font-medium">Loading...</h2>;
+    return <h2 className="text-center mt-10 text-slate-500 font-medium">Loading...</h2>;
   }
 
   return (
     <div className="space-y-8">
       <PageHeader
         title="Settings"
-        subtitle="Manage your tutor account configurations and security settings."
+        subtitle="Manage your account and security."
       />
 
-      {/* Account Information Section */}
-      <div className="bg-white rounded-2xl shadow p-8">
-        <h2 className="text-xl font-semibold mb-6">Account Information</h2>
-        <div className="grid md:grid-cols-2 gap-6">
+      {/* Account Information */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-6 md:p-8">
+        <h2 className="text-xl font-bold mb-6 text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <User size={20} className="text-indigo-600 dark:text-indigo-400" /> Account Information
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <p className="text-gray-500 text-sm">Name</p>
-            <h3 className="font-semibold text-lg text-gray-800">{profile.name}</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Name</p>
+            <h3 className="font-semibold text-lg text-slate-900 dark:text-slate-100">{profile.name}</h3>
           </div>
           <div>
-            <p className="text-gray-500 text-sm">Email Address</p>
-            <h3 className="font-semibold text-lg text-gray-800">{profile.email}</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Email Address</p>
+            <h3 className="font-semibold text-lg text-slate-900 dark:text-slate-100">{profile.email}</h3>
           </div>
           <div>
-            <p className="text-gray-500 text-sm">Account Type</p>
-            <h3 className="font-semibold text-lg text-gray-800 capitalize">{profile.role}</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Account Type</p>
+            <h3 className="font-semibold capitalize text-lg text-slate-900 dark:text-slate-100">{profile.role}</h3>
           </div>
           <div>
-            <p className="text-gray-500 text-sm">Member Since</p>
-            <h3 className="font-semibold text-lg text-gray-800">
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Member Since</p>
+            <h3 className="font-semibold text-lg text-slate-900 dark:text-slate-100">
               {new Date(profile.createdAt).toLocaleDateString()}
             </h3>
           </div>
         </div>
       </div>
 
-      {/* Security / Change Password Section */}
-      <div className="bg-white rounded-2xl shadow p-8">
-        <h2 className="text-xl font-semibold mb-6">Security & Password</h2>
+      {/* Security / Change Password */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-6 md:p-8">
+        <h2 className="text-xl font-bold mb-6 text-slate-900 dark:text-slate-100 flex items-center gap-2">
+          <Lock size={20} className="text-indigo-600 dark:text-indigo-400" /> Security & Password
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-5 max-w-xl">
           <div>
+            <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1.5 text-sm">Current Password</label>
             <input
               type="password"
               name="currentPassword"
-              placeholder="Current Password"
               value={formData.currentPassword}
               onChange={handleChange}
-              className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
+            <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1.5 text-sm">New Password</label>
             <input
               type="password"
               name="newPassword"
-              placeholder="New Password"
               value={formData.newPassword}
               onChange={handleChange}
-              className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
+            <label className="block text-slate-600 dark:text-slate-400 font-medium mb-1.5 text-sm">Confirm New Password</label>
             <input
               type="password"
               name="confirmPassword"
-              placeholder="Confirm New Password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition shadow-md shadow-indigo-600/20"
           >
             Update Password
           </button>
         </form>
       </div>
 
-      {/* Danger Zone / Logout Section */}
-      <div className="bg-white rounded-2xl shadow p-8">
-        <h2 className="text-xl font-semibold mb-4 text-red-600">Session Management</h2>
-        <p className="text-gray-500 mb-6 text-sm">
+      {/* Danger Zone / Logout */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-6 md:p-8">
+        <h2 className="text-xl font-bold mb-2 text-slate-900 dark:text-slate-100">Session Management</h2>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
           Log out of your current workspace session. You will need your credentials to log back in.
         </p>
         <button
           onClick={handleLogout}
-          className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200"
+          className="bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-xl font-semibold transition shadow-md shadow-rose-600/20 flex items-center gap-2"
         >
-          Logout Account
+          <LogOut size={18} /> Logout Account
         </button>
       </div>
     </div>

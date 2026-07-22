@@ -8,50 +8,34 @@ const {
   getAllTutors,
   getTutorById,
   getTutorReviews,
+  addAvailabilitySlot,
+  deleteAvailabilitySlot,
+  submitVerification,
 } = require("../controllers/tutorController");
 
 const protect = require("../middleware/authMiddleware");
 const authorize = require("../middleware/roleMidlleware");
+const upload = require("../middleware/uploadMiddleware");
 
-// Public tutor list
+// Public tutor list (with query filtering)
 router.get("/", protect, getAllTutors);
 
 // Logged in tutor profile
-router.get(
-  "/profile",
-  protect,
-  authorize("tutor"),
-  getTutorProfile
-);
+router.get("/profile", protect, authorize("tutor"), getTutorProfile);
+router.get("/reviews", protect, authorize("tutor"), getTutorReviews);
 
-router.get(
-  "/reviews",
-  protect,
-  authorize("tutor"),
-  getTutorReviews
-);
+// Profile management
+router.post("/create", protect, authorize("tutor"), createTutorProfile);
+router.put("/profile", protect, authorize("tutor"), updateTutorProfile);
 
-// Create profile
-router.post(
-  "/create",
-  protect,
-  authorize("tutor"),
-  createTutorProfile
-);
+// Availability slots
+router.post("/availability", protect, authorize("tutor"), addAvailabilitySlot);
+router.delete("/availability/:slotId", protect, authorize("tutor"), deleteAvailabilitySlot);
 
-// Update profile
-router.put(
-  "/profile",
-  protect,
-  authorize("tutor"),
-  updateTutorProfile
-);
+// Verification upload
+router.post("/verify", protect, authorize("tutor"), upload.single("docFile"), submitVerification);
 
-// Single tutor
-router.get(
-  "/:id",
-  protect,
-  getTutorById
-);
+// Single tutor detail
+router.get("/:id", protect, getTutorById);
 
 module.exports = router;

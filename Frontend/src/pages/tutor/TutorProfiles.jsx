@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import PageHeader from "../../components/dashboard/PageHeader";
 import StatCard from "../../components/dashboard/StatCard";
-import { Star, MessageSquare, CalendarCheck } from "lucide-react";
+import { Star, MessageSquare, CalendarCheck, CheckCircle2 } from "lucide-react";
 import { getTutorProfile, updateTutorProfile, createTutorProfile } from "../../api/tutorApi";
 import { toast } from "react-toastify";
 
@@ -105,77 +105,77 @@ function TutorProfiles() {
           title="Setup Tutor Profile"
           subtitle="Complete your teaching profile fields to start accepting student requests."
         />
-        <div className="bg-white rounded-2xl shadow p-8">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800">Create Profile</h2>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-6 md:p-8">
+          <h2 className="text-xl font-bold mb-6 text-slate-900 dark:text-slate-100">Create Profile</h2>
           <form onSubmit={handleSave} className="space-y-6 max-w-3xl">
             <div>
-              <label className="block text-gray-500 font-medium mb-2">Qualifications</label>
+              <label className="block text-slate-700 dark:text-slate-200 font-medium mb-1.5 text-sm">Qualifications</label>
               <input
                 name="qualifications"
                 value={formData.qualifications}
                 onChange={handleChange}
                 placeholder="e.g. B.Sc. in Computer Science, Certified Math Teacher"
-                className="border rounded-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-gray-500 font-medium mb-2">Experience (Years)</label>
+                <label className="block text-slate-700 dark:text-slate-200 font-medium mb-1.5 text-sm">Experience (Years)</label>
                 <input
                   type="number"
                   name="experience"
                   value={formData.experience}
                   onChange={handleChange}
                   placeholder="e.g. 3"
-                  className="border rounded-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   required
                 />
               </div>
               <div>
-                <label className="block text-gray-500 font-medium mb-2">Hourly Rate (Rs.)</label>
+                <label className="block text-slate-700 dark:text-slate-200 font-medium mb-1.5 text-sm">Hourly Rate (Rs.)</label>
                 <input
                   type="number"
                   name="hourlyRate"
                   value={formData.hourlyRate}
                   onChange={handleChange}
                   placeholder="e.g. 1200"
-                  className="border rounded-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-gray-500 font-medium mb-2">Bio</label>
+              <label className="block text-slate-700 dark:text-slate-200 font-medium mb-1.5 text-sm">Bio</label>
               <textarea
                 rows="5"
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
                 placeholder="Introduce yourself to potential students, your learning approaches, etc..."
-                className="border rounded-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-gray-500 font-medium mb-2">Subjects (Comma separated)</label>
+              <label className="block text-slate-700 dark:text-slate-200 font-medium mb-1.5 text-sm">Subjects (Comma separated)</label>
               <input
                 name="subjects"
                 value={formData.subjects}
                 onChange={handleChange}
-                className="border rounded-lg px-4 py-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="e.g. Math, Physics, Computer Science"
                 required
               />
             </div>
 
-            <div className="pt-4">
+            <div className="pt-2">
               <button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-medium transition duration-200"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold transition shadow-md shadow-indigo-600/20"
               >
                 Create Profile
               </button>
@@ -214,6 +214,21 @@ function TutorProfiles() {
     },
   ];
 
+  const getProfileCompletion = () => {
+    if (!profile) return 0;
+    let completed = 0;
+    if (profile.bio) completed += 15;
+    if (profile.qualifications) completed += 15;
+    if (profile.subjects && profile.subjects.length > 0) completed += 15;
+    if (profile.experience !== undefined && profile.experience !== null) completed += 15;
+    if (profile.hourlyRate) completed += 15;
+    if (profile.availability && profile.availability.length > 0) completed += 15;
+    if (profile.verificationDocs && profile.verificationDocs.length > 0) completed += 10;
+    return completed;
+  };
+
+  const completionPercentage = getProfileCompletion();
+
   return (
     <div className="space-y-8">
       <PageHeader
@@ -226,6 +241,26 @@ function TutorProfiles() {
         {stats.map((stat) => (
           <StatCard key={stat.title} {...stat} />
         ))}
+      </div>
+
+      {/* Profile Completion */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={20} className="text-indigo-600 dark:text-indigo-400" />
+            <h3 className="font-bold text-slate-900 dark:text-slate-100">Profile Completion</h3>
+          </div>
+          <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{completionPercentage}%</span>
+        </div>
+        <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
+          <div
+            className="bg-indigo-600 dark:bg-indigo-500 h-3 rounded-full transition-all duration-500"
+            style={{ width: `${completionPercentage}%` }}
+          />
+        </div>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+          Complete your profile to attract more students.
+        </p>
       </div>
 
       {/* Personal Information */}

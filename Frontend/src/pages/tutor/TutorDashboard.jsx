@@ -1,26 +1,16 @@
-import {
-  Calendar,
-  CalendarCheck,
-  MessageSquare,
-  Star,
-} from "lucide-react";
-
 import { useEffect, useState } from "react";
-
-import {
-  getTutorDashboard,
-} from "../../api/tutorApi";
-
+import { Calendar, CalendarCheck, MessageSquare, Star, TrendingUp, ShieldCheck } from "lucide-react";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
+import { getTutorDashboard } from "../../api/tutorApi";
 import PageHeader from "../../components/dashboard/PageHeader";
 import StatCard from "../../components/dashboard/StatCard";
 import QuickActions from "../../components/dashboard/QuickActions";
 import SectionCard from "../../components/dashboard/SectionCard";
 import EmptyState from "../../components/dashboard/EmptyState";
-
+import { CardSkeleton } from "../../components/common/Skeleton";
 import { tutorActions } from "../../mock/dashboard/tutorData";
 
 function TutorDashboard() {
-
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,169 +19,106 @@ function TutorDashboard() {
   }, []);
 
   const fetchDashboard = async () => {
-
     try {
-
+      setLoading(true);
       const data = await getTutorDashboard();
-
       setDashboard(data);
-
     } catch (error) {
-
       console.error(error);
-
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
-  if (loading) {
-    return <h2>Loading...</h2>;
-  }
-
-  const stats = [
-    {
-      title: "Pending Requests",
-      value: dashboard.pendingRequests,
-      icon: MessageSquare,
-      color: "yellow",
-    },
-    {
-      title: "Upcoming Sessions",
-      value: dashboard.upcomingSessions,
-      icon: Calendar,
-      color: "blue",
-    },
-    {
-      title: "Completed Sessions",
-      value: dashboard.completedSessions,
-      icon: CalendarCheck,
-      color: "green",
-    },
-    {
-      title: "Average Rating",
-      value: dashboard.averageRating,
-      icon: Star,
-      color: "purple",
-    },
+  const chartData = [
+    { name: "Pending", count: dashboard?.pendingRequests || 0 },
+    { name: "Upcoming", count: dashboard?.upcomingSessions || 0 },
+    { name: "Completed", count: dashboard?.completedSessions || 0 },
   ];
 
   return (
-    <div>
-
+    <div className="space-y-8">
       <PageHeader
         title="Tutor Dashboard"
-        subtitle="Manage tutoring requests and scheduled sessions."
+        subtitle="Track student requests, manage time slots, view ratings, and conduct sessions."
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <StatCard title="Pending Requests" value={dashboard?.pendingRequests || 0} icon={MessageSquare} color="yellow" />
+          <StatCard title="Upcoming Sessions" value={dashboard?.upcomingSessions || 0} icon={Calendar} color="blue" />
+          <StatCard title="Completed Sessions" value={dashboard?.completedSessions || 0} icon={CalendarCheck} color="green" />
+          <StatCard title="Average Rating" value={dashboard?.averageRating ? dashboard.averageRating.toFixed(1) : "N/A"} icon={Star} color="purple" />
+        </div>
+      )}
 
-        {stats.map((stat) => (
-          <StatCard
-            key={stat.title}
-            {...stat}
-          />
-        ))}
-
-      </div>
+      {/* Analytics Recharts Graph */}
+      {dashboard && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+            <TrendingUp size={16} className="text-indigo-600 dark:text-indigo-400" /> Session Performance Metrics
+          </h3>
+          <div className="h-60">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <XAxis dataKey="name" stroke="#94A3B8" fontSize={11} />
+                <YAxis stroke="#94A3B8" fontSize={11} />
+                <Tooltip contentStyle={{ borderRadius: "12px" }} />
+                <Bar dataKey="count" fill="#8B5CF6" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       <QuickActions actions={tutorActions} />
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-10">
-
-        <SectionCard
-          title="Recent Requests"
-          subtitle="Latest tutoring requests."
-        >
-
-          {dashboard.recentRequests.length === 0 ? (
-
-            <EmptyState
-              icon={MessageSquare}
-              title="No Requests"
-              description="New tutoring requests will appear here."
-            />
-
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <SectionCard title="Recent Student Requests" subtitle="Latest tutoring session requests from students.">
+          {!dashboard?.recentRequests || dashboard.recentRequests.length === 0 ? (
+            <EmptyState icon={MessageSquare} title="No Incoming Requests" description="New tutoring requests will appear here." />
           ) : (
-
-            <div className="space-y-4">
-
+            <div className="space-y-3">
               {dashboard.recentRequests.map((request) => (
-
-                <div
-                  key={request._id}
-                  className="border rounded-lg p-4"
-                >
-                  <h3 className="font-semibold">
-                    {request.student.name}
-                  </h3>
-
-                  <p className="text-sm text-gray-500">
-                    {request.subject}
-                  </p>
-
-                  <p className="text-sm">
-                    {request.topic}
-                  </p>
-
+                <div key={request._id} className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{request.student?.name}</h4>
+                    <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold mt-0.5">{request.subject} - {request.topic}</p>
+                  </div>
+                  <a href="/tutor/requests" className="px-3 py-1.5 bg-indigo-600 text-white font-semibold text-xs rounded-lg hover:bg-indigo-700 transition">
+                    Review
+                  </a>
                 </div>
-
               ))}
-
             </div>
-
           )}
-
         </SectionCard>
 
-        <SectionCard
-          title="Upcoming Sessions"
-          subtitle="Your scheduled tutoring sessions."
-        >
-
-          {dashboard.upcomingSessionsList.length === 0 ? (
-
-            <EmptyState
-              icon={Calendar}
-              title="No Sessions"
-              description="Accepted requests will appear here."
-            />
-
+        <SectionCard title="Upcoming Scheduled Sessions" subtitle="Your accepted tutoring sessions.">
+          {!dashboard?.upcomingSessionsList || dashboard.upcomingSessionsList.length === 0 ? (
+            <EmptyState icon={Calendar} title="No Upcoming Sessions" description="Accepted requests will appear here." />
           ) : (
-
-            <div className="space-y-4">
-
+            <div className="space-y-3">
               {dashboard.upcomingSessionsList.map((session) => (
-
-                <div
-                  key={session._id}
-                  className="border rounded-lg p-4"
-                >
-                  <h3 className="font-semibold">
-                    {session.student.name}
-                  </h3>
-
-                  <p>{session.subject}</p>
-
-                  <p className="text-sm text-gray-500">
-                    {new Date(session.sessionDate).toLocaleDateString()}
-                  </p>
-
+                <div key={session._id} className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{session.student?.name}</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{session.subject} • {new Date(session.sessionDate).toLocaleDateString()}</p>
+                  </div>
+                  <a href="/tutor/sessions" className="px-3 py-1.5 bg-emerald-600 text-white font-semibold text-xs rounded-lg hover:bg-emerald-700 transition">
+                    Manage
+                  </a>
                 </div>
-
               ))}
-
             </div>
-
           )}
-
         </SectionCard>
-
       </div>
-
     </div>
   );
 }

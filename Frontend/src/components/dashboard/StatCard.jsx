@@ -11,6 +11,7 @@ function StatCard({
     orange: "bg-orange-100 text-orange-600",
     red: "bg-red-100 text-red-600",
     purple: "bg-purple-100 text-purple-600",
+    emerald: "bg-emerald-100 text-emerald-600",
   };
 
   return (

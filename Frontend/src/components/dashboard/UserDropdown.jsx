@@ -82,7 +82,7 @@ function UserDropdown() {
         <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden z-50">
 
       <button
-        onClick={() => navigate('/student/profile')}
+        onClick={() => navigate(`/${user?.role}/profile`)}
         className="flex items-center gap-3 w-full px-5 py-3 hover:bg-slate-50 transition"
       >
         <User size={18} />
@@ -90,7 +90,7 @@ function UserDropdown() {
       </button>
 
       <button
-        onClick={() => navigate('/student/settings')}
+        onClick={() => navigate(`/${user?.role}/settings`)}
         className="flex items-center gap-3 w-full px-5 py-3 hover:bg-slate-50 transition"
       >
         <Settings size={18} />

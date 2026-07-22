@@ -1,267 +1,107 @@
 import { useEffect, useState } from "react";
-import {
-  Loader2,
-  MessageSquare,
-  Search,
-  Star,
-} from "lucide-react";
-
+import { Star, Search } from "lucide-react";
 import { getTutorReviews } from "../../api/tutorApi";
+import PageHeader from "../../components/dashboard/PageHeader";
+import EmptyState from "../../components/dashboard/EmptyState";
+import { TableSkeleton } from "../../components/common/Skeleton";
 
 function TutorReviews() {
-
   const [reviews, setReviews] = useState([]);
-  const [filteredReviews, setFilteredReviews] = useState([]);
-
   const [loading, setLoading] = useState(true);
-
-  const [error, setError] = useState("");
-
   const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchReviews();
   }, []);
 
-  useEffect(() => {
-
-    const filtered = reviews.filter((review) =>
-      review.student?.name
-        ?.toLowerCase()
-        .includes(search.toLowerCase()) ||
-
-      review.review
-        ?.toLowerCase()
-        .includes(search.toLowerCase())
-    );
-
-    setFilteredReviews(filtered);
-
-  }, [search, reviews]);
-
   const fetchReviews = async () => {
-
     try {
-
-      setLoading(true);
-
       const data = await getTutorReviews();
-
-      setReviews(data.reviews);
-      setFilteredReviews(data.reviews);
-
+      setReviews(data.reviews || []);
     } catch (err) {
-
       console.error(err);
-      setError("Failed to load reviews.");
-
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
+  const filteredReviews = reviews.filter((review) =>
+    review.student?.name?.toLowerCase().includes(search.toLowerCase()) ||
+    review.review?.toLowerCase().includes(search.toLowerCase())
+  );
+
   const renderStars = (rating) => {
-
     return (
-
       <div className="flex gap-1 justify-center">
-
-        {[1,2,3,4,5].map((star)=>(
-
+        {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
             size={16}
             className={
-              star<=rating
-              ? "fill-yellow-400 text-yellow-400"
-              : "text-gray-300"
+              star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
             }
           />
-
         ))}
-
       </div>
-
     );
-
   };
 
-  if (loading) {
-
-    return (
-
-      <div className="flex justify-center items-center h-80">
-
-        <Loader2
-          size={45}
-          className="animate-spin text-blue-600"
-        />
-
-      </div>
-
-    );
-
-  }
-
-  if (error) {
-
-    return (
-
-      <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-
-        <h2 className="text-2xl font-bold text-red-600">
-
-          Something went wrong
-
-        </h2>
-
-        <p className="mt-2">
-
-          {error}
-
-        </p>
-
-        <button
-          onClick={fetchReviews}
-          className="mt-5 bg-red-600 text-white px-5 py-2 rounded-lg"
-        >
-
-          Try Again
-
-        </button>
-
-      </div>
-
-    );
-
-  }
-
   return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Student Reviews"
+        subtitle="See what your students say about your tutoring sessions."
+      />
 
-    <div>
-
-      {/* Header */}
-
-      <div className="flex justify-between items-center mb-8">
-
-        <div>
-
-          <h1 className="text-3xl font-bold">
-
-            My Reviews
-
-          </h1>
-
-          <p className="text-gray-500 mt-2">
-
-            Total Reviews : {reviews.length}
-
-          </p>
-
-        </div>
-
-      </div>
-
-      {/* Search */}
-
-      <div className="relative mb-6">
-
-        <Search
-          size={20}
-          className="absolute left-4 top-3.5 text-gray-400"
-        />
-
+      <div className="relative">
+        <Search className="absolute left-4 top-3.5 text-slate-400" size={18} />
         <input
           type="text"
-          placeholder="Search reviews..."
-          className="w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500"
           value={search}
-          onChange={(e)=>setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search reviews by student or keyword..."
+          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
-
       </div>
 
-      {/* Empty */}
-
-      {filteredReviews.length===0 ? (
-
-        <div className="bg-white rounded-xl shadow p-12 text-center">
-
-          <MessageSquare
-            size={70}
-            className="mx-auto text-gray-300"
-          />
-
-          <h2 className="text-2xl font-bold mt-4">
-
-            No Reviews Yet
-
-          </h2>
-
-          <p className="text-gray-500 mt-2">
-
-            Students haven't reviewed you yet.
-
-          </p>
-
-        </div>
-
+      {loading ? (
+        <TableSkeleton rows={5} />
+      ) : filteredReviews.length === 0 ? (
+        <EmptyState
+          icon={Star}
+          title="No Reviews Yet"
+          description="Students haven't submitted any reviews for your sessions yet."
+        />
       ) : (
-
-        <div className="space-y-5">
-
-          {filteredReviews.map((review)=>(
-
-            <div
-              key={review._id}
-              className="bg-white rounded-xl shadow p-6"
-            >
-
-              <div className="flex justify-between items-center">
-
-                <div>
-
-                  <h3 className="font-bold text-lg">
-
-                    {review.student?.name}
-
-                  </h3>
-
-                  <p className="text-gray-500 text-sm">
-
-                    {new Date(
-                      review.createdAt
-                    ).toLocaleDateString()}
-
-                  </p>
-
-                </div>
-
-                {renderStars(review.rating)}
-
-              </div>
-
-              <p className="mt-4 text-gray-700">
-
-                {review.review}
-
-              </p>
-
-            </div>
-
-          ))}
-
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+              <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
+                <tr>
+                  <th className="p-4">Student</th>
+                  <th className="p-4 text-center">Rating</th>
+                  <th className="p-4">Review</th>
+                  <th className="p-4 text-right">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {filteredReviews.map((review) => (
+                  <tr key={review._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition">
+                    <td className="p-4 font-medium text-slate-900 dark:text-slate-100">{review.student?.name || "Student"}</td>
+                    <td className="p-4 text-center">{renderStars(review.rating)}</td>
+                    <td className="p-4 text-slate-700 dark:text-slate-300 max-w-sm">{review.review}</td>
+                    <td className="p-4 text-right text-slate-400 font-mono whitespace-nowrap">
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-
       )}
-
     </div>
-
   );
-
 }
 
 export default TutorReviews;

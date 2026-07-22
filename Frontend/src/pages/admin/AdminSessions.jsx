@@ -1,311 +1,129 @@
 import { useEffect, useState } from "react";
-import {
-  Search,
-  Loader2,
-  CalendarDays,
-} from "lucide-react";
-
 import { getSessions } from "../../api/adminApi";
+import PageHeader from "../../components/dashboard/PageHeader";
+import ReusableTable from "../../components/common/ReusableTable";
+import { CalendarDays, Search } from "lucide-react";
+import { downloadCSV } from "../../utils/exportCSV";
 
 function AdminSessions() {
-
   const [sessions, setSessions] = useState([]);
-  const [filteredSessions, setFilteredSessions] = useState([]);
-
   const [search, setSearch] = useState("");
-
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const LIMIT = 10;
 
   useEffect(() => {
     fetchSessions();
-  }, []);
-
-  useEffect(() => {
-
-    const filtered = sessions.filter((session) => {
-
-      return (
-
-        session.student?.name
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-
-        session.tutor?.name
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-
-        session.subject
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-
-        session.topic
-          ?.toLowerCase()
-          .includes(search.toLowerCase())
-
-      );
-
-    });
-
-    setFilteredSessions(filtered);
-
-  }, [search, sessions]);
+  }, [page, search]);
 
   const fetchSessions = async () => {
-
     try {
-
       setLoading(true);
       setError("");
-
-      const { data } = await getSessions();
-
-      setSessions(data.sessions);
-      setFilteredSessions(data.sessions);
-
+      const { data } = await getSessions({ search, page, limit: LIMIT });
+      setSessions(data.sessions || []);
+      setTotalPages(data.totalPages || 1);
     } catch (err) {
-
       console.error(err);
       setError("Failed to load sessions.");
-
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
   const getStatusBadge = (status) => {
-
     switch (status) {
-
       case "Upcoming":
-        return (
-          <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-600 text-xs font-semibold">
-            Upcoming
-          </span>
-        );
-
+        return <span className="px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-600 text-xs font-semibold border border-blue-200">Upcoming</span>;
       case "Completed":
-        return (
-          <span className="px-3 py-1 rounded-full bg-green-100 text-green-600 text-xs font-semibold">
-            Completed
-          </span>
-        );
-
+        return <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 text-xs font-semibold border border-emerald-200">Completed</span>;
       case "Cancelled":
-        return (
-          <span className="px-3 py-1 rounded-full bg-red-100 text-red-600 text-xs font-semibold">
-            Cancelled
-          </span>
-        );
-
+        return <span className="px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/50 text-rose-600 text-xs font-semibold border border-rose-200">Cancelled</span>;
       default:
         return status;
-
     }
-
   };
 
-  if (loading) {
+  const columns = [
+    { key: "student.name", label: "Student", render: (val) => val || "—" },
+    { key: "tutor.name", label: "Tutor", render: (val) => val || "—" },
+    { key: "subject", label: "Subject" },
+    { key: "topic", label: "Topic" },
+    {
+      key: "sessionDate",
+      label: "Date",
+      render: (val) => (val ? new Date(val).toLocaleDateString() : "—"),
+    },
+    { key: "sessionTime", label: "Time" },
+    {
+      key: "status",
+      label: "Status",
+      render: (status) => getStatusBadge(status),
+    },
+  ];
+
+  const handleExport = () => {
+    downloadCSV(sessions, "sessions", columns);
+  };
+
+  if (loading && sessions.length === 0) {
     return (
-      <div className="flex justify-center items-center h-80">
-        <Loader2
-          size={45}
-          className="animate-spin text-blue-600"
-        />
+      <div className="space-y-6">
+        <PageHeader title="All Sessions" subtitle="Monitor all platform tutoring sessions." />
+        <ReusableTable columns={columns} data={[]} loading />
       </div>
     );
   }
 
   if (error) {
-
     return (
-
-      <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-
-        <h2 className="text-2xl font-bold text-red-600">
-          Something went wrong
-        </h2>
-
-        <p className="mt-3">
-          {error}
-        </p>
-
-        <button
-          onClick={fetchSessions}
-          className="mt-5 bg-red-600 text-white px-5 py-2 rounded-lg"
-        >
+      <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6">
+        <h2 className="text-2xl font-bold text-rose-600">Something went wrong</h2>
+        <p className="mt-3 text-slate-600">{error}</p>
+        <button onClick={fetchSessions} className="mt-5 bg-rose-600 text-white px-5 py-2 rounded-lg hover:bg-rose-700">
           Try Again
         </button>
-
       </div>
-
     );
-
   }
 
   return (
+    <div className="space-y-6">
+      <PageHeader title="All Sessions" subtitle={`Total Sessions: ${sessions.length > 0 ? "showing paginated results" : "0"}`} />
 
-    <div>
-
-      {/* Header */}
-
-      <div className="flex justify-between items-center mb-8">
-
-        <div>
-
-          <h1 className="text-3xl font-bold">
-            Sessions
-          </h1>
-
-          <p className="text-gray-500 mt-2">
-            Total Sessions : {sessions.length}
-          </p>
-
-        </div>
-
-      </div>
-
-      {/* Search */}
-
-      <div className="relative mb-6">
-
-        <Search
-          className="absolute left-4 top-3.5 text-gray-400"
-          size={20}
-        />
-
-        <input
-          type="text"
-          placeholder="Search sessions..."
-          className="w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500"
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-        />
-
-      </div>
-
-      {/* Empty */}
-
-      {filteredSessions.length === 0 ? (
-
-        <div className="bg-white rounded-xl shadow p-12 text-center">
-
-          <CalendarDays
-            size={70}
-            className="mx-auto text-gray-300"
+      <div className="flex items-center justify-between">
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-3.5 text-slate-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search sessions..."
+            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
-
-          <h2 className="text-2xl font-bold mt-4">
-            No Sessions Found
-          </h2>
-
-          <p className="text-gray-500 mt-2">
-            Try another search.
-          </p>
-
         </div>
+        <button onClick={handleExport} className="ml-4 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+          Export CSV
+        </button>
+      </div>
 
-      ) : (
-
-        <div className="bg-white rounded-xl shadow overflow-x-auto">
-
-          <table className="w-full">
-
-            <thead className="bg-slate-100">
-
-              <tr>
-
-                <th className="p-4 text-left">
-                  Student
-                </th>
-
-                <th className="p-4 text-left">
-                  Tutor
-                </th>
-
-                <th className="p-4 text-left">
-                  Subject
-                </th>
-
-                <th className="p-4 text-left">
-                  Topic
-                </th>
-
-                <th className="p-4 text-center">
-                  Date
-                </th>
-
-                <th className="p-4 text-center">
-                  Time
-                </th>
-
-                <th className="p-4 text-center">
-                  Status
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {filteredSessions.map((session) => (
-
-                <tr
-                  key={session._id}
-                  className="border-b hover:bg-slate-50"
-                >
-
-                  <td className="p-4">
-                    {session.student?.name}
-                  </td>
-
-                  <td className="p-4">
-                    {session.tutor?.name}
-                  </td>
-
-                  <td className="p-4">
-                    {session.subject}
-                  </td>
-
-                  <td className="p-4">
-                    {session.topic}
-                  </td>
-
-                  <td className="p-4 text-center">
-                    {new Date(session.sessionDate).toLocaleDateString()}
-                  </td>
-
-                  <td className="p-4 text-center">
-                    {session.sessionTime}
-                  </td>
-
-                  <td className="p-4 text-center">
-                    {getStatusBadge(session.status)}
-                  </td>
-
-                </tr>
-
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      )}
-
+      <ReusableTable
+        columns={columns}
+        data={sessions}
+        loading={loading}
+        emptyIcon={CalendarDays}
+        emptyTitle="No Sessions Found"
+        emptyDescription="Try another search keyword."
+        showPagination
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
     </div>
-
   );
-
 }
 
 export default AdminSessions;

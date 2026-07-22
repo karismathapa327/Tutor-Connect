@@ -4,6 +4,7 @@ import {
   CalendarPlus,
   MessageSquare,
   Star,
+  CheckCircle2,
 } from "lucide-react";
 
 import PageHeader from "../../components/dashboard/PageHeader";
@@ -19,6 +20,7 @@ function StudentProfile() {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchProfile();
@@ -39,6 +41,7 @@ function StudentProfile() {
     } catch (error) {
 
       console.error(error);
+      setError("Failed to load profile. Please try again later.");
 
     } finally {
 
@@ -83,6 +86,28 @@ function StudentProfile() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-center mt-10">
+        <p className="text-red-600 mb-4">{error}</p>
+        <button
+          onClick={fetchProfile}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="text-center mt-10">
+        <p className="text-slate-600">No profile data available.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
 
@@ -92,7 +117,7 @@ function StudentProfile() {
       />
 
       {/* Personal Information */}
-      <div className="bg-white rounded-2xl shadow p-8">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-8">
 
         <div className="flex items-center gap-6 mb-8">
 
@@ -174,10 +199,27 @@ function StudentProfile() {
 
       </div>
 
+      {/* Profile Completion */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm p-6">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={20} className="text-emerald-600 dark:text-emerald-400" />
+            <h3 className="font-bold text-slate-900 dark:text-slate-100">Profile Strength</h3>
+          </div>
+          <span className="text-sm font-bold text-slate-700 dark:text-slate-200">100%</span>
+        </div>
+        <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
+          <div className="bg-emerald-600 dark:bg-emerald-500 h-3 rounded-full transition-all duration-500" style={{ width: "100%" }} />
+        </div>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+          Your profile is complete. Keep learning to unlock more features.
+        </p>
+      </div>
+
       {/* Learning Summary */}
       <div>
 
-        <h2 className="text-2xl font-semibold mb-6">
+        <h2 className="text-2xl font-semibold mb-6 text-slate-900 dark:text-slate-100">
           Learning Summary
         </h2>
 
