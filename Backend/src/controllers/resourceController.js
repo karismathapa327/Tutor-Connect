@@ -1,87 +1,45 @@
-const Resource = require("../models/Resource");
+const resourceService = require("../services/resource.service");
 
-// Upload / Create Resource
-const createResource = async (req, res) => {
-  try {
-    const { title, description, subject, fileType, externalUrl } = req.body;
-
-    let fileUrl = externalUrl;
-    if (req.file) {
-      fileUrl = `/uploads/${req.file.filename}`;
-    }
-
-    if (!fileUrl && !externalUrl) {
-      return res.status(400).json({ message: "File or link is required." });
-    }
-
-    const resource = await Resource.create({
-      tutor: req.user.id,
-      title,
-      description,
-      subject,
-      fileType: fileType || "PDF",
-      fileUrl: fileUrl,
-    });
-
-    res.status(201).json({
-      message: "Resource uploaded successfully.",
-      resource,
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Get all resources (accessible by student and tutor)
 const getAllResources = async (req, res) => {
   try {
-    const { subject, fileType, search } = req.query;
-
-    const query = {};
-    if (subject) query.subject = { $regex: subject, $options: "i" };
-    if (fileType) query.fileType = fileType;
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { subject: { $regex: search, $options: "i" } },
-      ];
-    }
-
-    const resources = await Resource.find(query)
-      .populate("tutor", "name email")
-      .sort({ createdAt: -1 });
-
-    res.status(200).json({
-      count: resources.length,
-      resources,
-    });
+    const result = await resourceService.getAllResources(req.query);
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Delete resource
+const createResource = async (req, res) => {
+  try {
+    const tutorId = req.user.id;
+    const resourceData = {
+      title: req.body.title,
+      description: req.body.description,
+      subject: req.body.subject,
+      fileType: req.body.fileType || "PDF",
+      fileUrl: req.file ? `/uploads/${req.file.filename}` : req.body.fileUrl,
+    };
+
+    const result = await resourceService.createResource(tutorId, resourceData);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 const deleteResource = async (req, res) => {
   try {
-    const resource = await Resource.findById(req.params.id);
-    if (!resource) {
-      return res.status(404).json({ message: "Resource not found." });
-    }
-
-    if (resource.tutor.toString() !== req.user.id && req.user.role !== "admin") {
-      return res.status(403).json({ message: "Not authorized to delete this resource." });
-    }
-
-    await resource.deleteOne();
-    res.status(200).json({ message: "Resource deleted successfully." });
+    const tutorId = req.user.id;
+    const result = await resourceService.deleteResource(req.params.id, tutorId);
+    res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const statusCode = error.message.includes("not found") || error.message.includes("authorized") ? 404 : 500;
+    res.status(statusCode).json({ message: error.message });
   }
 };
 
 module.exports = {
-  createResource,
   getAllResources,
+  createResource,
   deleteResource,
 };

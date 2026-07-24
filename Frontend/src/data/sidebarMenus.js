@@ -11,8 +11,9 @@ import {
   Heart,
   FileText,
   CreditCard,
-  Award,
+  Flame,
   ShieldCheck,
+  Award,
   Star,
   Clock,
   Bell,
@@ -56,9 +57,9 @@ export const sidebarMenus = {
       path: "/student/payments",
     },
     {
-      title: "Certificates",
-      icon: Award,
-      path: "/student/certificates",
+      title: "Milestones",
+      icon: Flame,
+      path: "/student/milestones",
     },
     {
       title: "Notifications",

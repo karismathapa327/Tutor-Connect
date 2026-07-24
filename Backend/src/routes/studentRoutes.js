@@ -6,6 +6,7 @@ const authorize = require("../middleware/roleMidlleware");
 
 const {
   getStudentDashboard,
+  getSuggestedTutors,
 } = require("../controllers/studentController");
 
 router.get(
@@ -13,6 +14,13 @@ router.get(
   protect,
   authorize("student"),
   getStudentDashboard
+);
+
+router.get(
+  "/suggested-tutors",
+  protect,
+  authorize("student"),
+  getSuggestedTutors
 );
 
 module.exports = router;

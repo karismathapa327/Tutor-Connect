@@ -50,14 +50,23 @@ export const getTutorReviews = async () => {
   return response.data;
 };
 
-// Availability slots
-export const addAvailabilitySlot = async (slotData) => {
-  const response = await api.post("/tutors/availability", slotData);
+export const getMySlots = async (date) => {
+  const response = await api.get("/tutors/slots/stats");
   return response.data;
 };
 
-export const deleteAvailabilitySlot = async (slotId) => {
-  const response = await api.delete(`/tutors/availability/${slotId}`);
+export const createSlot = async (slotData) => {
+  const response = await api.post("/tutors/slots", slotData);
+  return response.data;
+};
+
+export const deleteSlot = async (slotId) => {
+  const response = await api.delete(`/tutors/slots/${slotId}`);
+  return response.data;
+};
+
+export const getTutorSlotStats = async () => {
+  const response = await api.get("/tutors/slots/stats");
   return response.data;
 };
 

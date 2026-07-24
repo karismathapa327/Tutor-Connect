@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User, Mail, Lock, Save } from "lucide-react";
 import PageHeader from "../../components/dashboard/PageHeader";
 import { getProfile, changePassword } from "../../api/authApi";
 import { toast } from "react-toastify";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function AdminSettings() {
   const [profile, setProfile] = useState(null);
@@ -12,8 +13,11 @@ function AdminSettings() {
     newPassword: "",
     confirmPassword: "",
   });
+  const fetched = useRef(false);
 
   useEffect(() => {
+    if (fetched.current) return;
+    fetched.current = true;
     fetchProfile();
   }, []);
 
@@ -88,7 +92,7 @@ function AdminSettings() {
           <div>
             <p className="text-slate-500 text-sm">Member Since</p>
             <h3 className="font-semibold text-lg text-slate-900 dark:text-slate-100">
-              {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : "N/A"}
+              {profile?.createdAt ? formatNepaliDate(new Date(profile.createdAt)) : "N/A"}
             </h3>
           </div>
         </div>

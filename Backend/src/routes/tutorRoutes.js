@@ -8,8 +8,6 @@ const {
   getAllTutors,
   getTutorById,
   getTutorReviews,
-  addAvailabilitySlot,
-  deleteAvailabilitySlot,
   submitVerification,
 } = require("../controllers/tutorController");
 
@@ -28,12 +26,11 @@ router.get("/reviews", protect, authorize("tutor"), getTutorReviews);
 router.post("/create", protect, authorize("tutor"), createTutorProfile);
 router.put("/profile", protect, authorize("tutor"), updateTutorProfile);
 
-// Availability slots
-router.post("/availability", protect, authorize("tutor"), addAvailabilitySlot);
-router.delete("/availability/:slotId", protect, authorize("tutor"), deleteAvailabilitySlot);
-
 // Verification upload
 router.post("/verify", protect, authorize("tutor"), upload.single("docFile"), submitVerification);
+
+// Availability slots (new slot-based scheduling)
+router.use("/", require("./availabilityRoutes"));
 
 // Single tutor detail
 router.get("/:id", protect, getTutorById);

@@ -4,6 +4,7 @@ import { getTutorReviews } from "../../api/tutorApi";
 import PageHeader from "../../components/dashboard/PageHeader";
 import EmptyState from "../../components/dashboard/EmptyState";
 import { TableSkeleton } from "../../components/common/Skeleton";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function TutorReviews() {
   const [reviews, setReviews] = useState([]);
@@ -91,7 +92,7 @@ function TutorReviews() {
                     <td className="p-4 text-center">{renderStars(review.rating)}</td>
                     <td className="p-4 text-slate-700 dark:text-slate-300 max-w-sm">{review.review}</td>
                     <td className="p-4 text-right text-slate-400 font-mono whitespace-nowrap">
-                      {new Date(review.createdAt).toLocaleDateString()}
+                      {formatNepaliDate(new Date(review.createdAt))}
                     </td>
                   </tr>
                 ))}

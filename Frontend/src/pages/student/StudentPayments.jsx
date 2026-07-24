@@ -3,6 +3,7 @@ import { CreditCard, CheckCircle2, DollarSign, Clock, ShieldCheck } from "lucide
 import { getMyPayments } from "../../api/featureApi";
 import EmptyState from "../../components/dashboard/EmptyState";
 import { TableSkeleton } from "../../components/common/Skeleton";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function StudentPayments() {
   const [payments, setPayments] = useState([]);
@@ -43,7 +44,7 @@ function StudentPayments() {
           <div className="flex items-center gap-2 text-emerald-100 text-xs font-medium uppercase tracking-wide">
             <DollarSign size={16} /> Total Paid
           </div>
-          <div className="text-3xl font-extrabold mt-2">${totalSpent.toFixed(2)}</div>
+          <div className="text-3xl font-extrabold mt-2">Rs. {totalSpent.toFixed(2)}</div>
           <p className="text-emerald-100 text-[11px] mt-1">Total across {payments.length} completed transactions</p>
         </div>
 
@@ -62,7 +63,7 @@ function StudentPayments() {
             <Clock size={16} className="text-indigo-500" /> Recent Activity
           </div>
           <div className="text-xl font-bold text-slate-900 dark:text-slate-100 mt-2">
-            {payments.length > 0 ? new Date(payments[0].createdAt).toLocaleDateString() : "No Activity"}
+            {payments.length > 0 ? formatNepaliDate(new Date(payments[0].createdAt)) : "No Activity"}
           </div>
           <p className="text-slate-400 text-[11px] mt-1">Last payment timestamp</p>
         </div>
@@ -107,7 +108,7 @@ function StudentPayments() {
                       {p.paymentMethod}
                     </td>
                     <td className="p-4 font-extrabold text-slate-900 dark:text-slate-100 text-sm">
-                      ${p.amount.toFixed(2)}
+                      Rs. {p.amount.toFixed(2)}
                     </td>
                     <td className="p-4">
                       <span className="px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 font-bold text-[11px] uppercase border border-emerald-200 dark:border-emerald-800/40">
@@ -115,7 +116,7 @@ function StudentPayments() {
                       </span>
                     </td>
                     <td className="p-4 text-right text-slate-400 font-mono">
-                      {new Date(p.createdAt).toLocaleDateString()}
+                      {formatNepaliDate(new Date(p.createdAt))}
                     </td>
                   </tr>
                 ))}

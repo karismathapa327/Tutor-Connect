@@ -1,6 +1,7 @@
 import api from "./axios";
 
 export const getDashboardStats = () => api.get("/admin/statistics");
+export const getSchedulingStats = () => api.get("/admin/scheduling/stats");
 export const getUsers = (params = {}) => api.get("/admin/users", { params });
 export const getTutors = (params = {}) => api.get("/admin/tutors", { params });
 export const getSessions = (params = {}) => api.get("/admin/sessions", { params });

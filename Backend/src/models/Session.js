@@ -20,6 +20,12 @@ const sessionSchema = new mongoose.Schema(
       required: true,
     },
 
+    slotId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Availability",
+      default: null,
+    },
+
     subject: {
       type: String,
       required: true,

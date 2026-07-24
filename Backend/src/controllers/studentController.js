@@ -1,37 +1,26 @@
-const Request = require("../models/Request");
-const Session = require("../models/Session");
-const Review = require("../models/Review");
+const dashboardService = require("../services/dashboard.service");
+const tutorService = require("../services/tutor.service");
 
 const getStudentDashboard = async (req, res) => {
   try {
     const studentId = req.user.id;
-
-    const pendingRequests = await Request.countDocuments({
-      student: studentId,
-      status: "Pending",
+    const result = await dashboardService.getStudentDashboard(studentId);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
     });
+  }
+};
 
-    const upcomingSessions = await Session.countDocuments({
-      student: studentId,
-      status: "Upcoming",
-    });
-
-    const completedSessions = await Session.countDocuments({
-      student: studentId,
-      status: "Completed",
-    });
-
-    const reviewsGiven = await Review.countDocuments({
-      student: studentId,
-    });
-
+const getSuggestedTutors = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const result = await tutorService.getAllTutors(req.query);
     res.status(200).json({
-      pendingRequests,
-      upcomingSessions,
-      completedSessions,
-      reviewsGiven,
+      tutors: result.tutors || [],
+      count: result.count || 0,
     });
-
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -41,4 +30,5 @@ const getStudentDashboard = async (req, res) => {
 
 module.exports = {
   getStudentDashboard,
+  getSuggestedTutors,
 };

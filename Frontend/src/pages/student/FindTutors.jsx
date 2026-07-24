@@ -32,7 +32,7 @@ function FindTutors() {
       setLoading(true);
       const queryParams = { ...filters, search: search.trim() };
       const data = await getTutors(queryParams);
-      setTutors(data || []);
+      setTutors(data.tutors || []);
 
       const favData = await getFavoriteIds();
       setFavoriteIds(favData.favoriteIds || []);

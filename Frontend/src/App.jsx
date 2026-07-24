@@ -18,7 +18,7 @@ const StudentRequests = lazy(() => import("./pages/student/StudentRequests"));
 const StudentProfile = lazy(() => import("./pages/student/StudentProfile"));
 const StudentSettings = lazy(() => import("./pages/student/StudentSettings"));
 const StudentPayments = lazy(() => import("./pages/student/StudentPayments"));
-const StudentCertificates = lazy(() => import("./pages/student/StudentCertificates"));
+const StudentMilestones = lazy(() => import("./pages/student/StudentMilestones"));
 const FavoriteTutors = lazy(() => import("./pages/student/FavoriteTutors"));
 const LearningResources = lazy(() => import("./pages/student/LearningResources"));
 const TutorProfile = lazy(() => import("./pages/student/TutorProfile"));
@@ -78,7 +78,7 @@ function App() {
             <Route path="favorites" element={<Suspense fallback={<LoadingFallback />}><FavoriteTutors /></Suspense>} />
             <Route path="resources" element={<Suspense fallback={<LoadingFallback />}><LearningResources /></Suspense>} />
             <Route path="payments" element={<Suspense fallback={<LoadingFallback />}><StudentPayments /></Suspense>} />
-            <Route path="certificates" element={<Suspense fallback={<LoadingFallback />}><StudentCertificates /></Suspense>} />
+            <Route path="milestones" element={<Suspense fallback={<LoadingFallback />}><StudentMilestones /></Suspense>} />
             <Route path="profile" element={<Suspense fallback={<LoadingFallback />}><StudentProfile /></Suspense>} />
             <Route path="settings" element={<Suspense fallback={<LoadingFallback />}><StudentSettings /></Suspense>} />
             <Route path="notifications" element={<Suspense fallback={<LoadingFallback />}><Notifications /></Suspense>} />

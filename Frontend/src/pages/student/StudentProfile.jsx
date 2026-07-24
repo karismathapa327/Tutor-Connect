@@ -14,6 +14,7 @@ import {
   getStudentProfile,
   getStudentDashboard,
 } from "../../api/studentApi";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function StudentProfile() {
 
@@ -190,7 +191,7 @@ function StudentProfile() {
             </p>
 
             <h3 className="font-semibold text-lg">
-              {new Date(profile.createdAt).toLocaleDateString()}
+              {formatNepaliDate(new Date(profile.createdAt))}
             </h3>
 
           </div>

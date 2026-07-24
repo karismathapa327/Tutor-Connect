@@ -9,6 +9,8 @@ import {
   DollarSign,
   ShieldCheck,
   TrendingUp,
+  Clock,
+  BarChart3,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -22,9 +24,12 @@ import {
   Cell,
   LineChart,
   Line,
+  AreaChart,
+  Area,
   CartesianGrid,
 } from "recharts";
 
+import { formatNepaliDate, NEPALI_MONTHS_EN } from "../../utils/dateUtils";
 import { getDashboardStats } from "../../api/adminApi";
 import { StatCard, PageHeader, SectionCard, EmptyState } from "../../components/dashboard";
 import { CardSkeleton } from "../../components/common/Skeleton";
@@ -78,12 +83,12 @@ function AdminDashboard() {
   }
 
   const monthlyData = [
-    { name: "Jan", users: 120, sessions: 45 },
-    { name: "Feb", users: 180, sessions: 60 },
-    { name: "Mar", users: 250, sessions: 90 },
-    { name: "Apr", users: 320, sessions: 120 },
-    { name: "May", users: 400, sessions: 150 },
-    { name: "Jun", users: 480, sessions: 180 },
+    { name: NEPALI_MONTHS_EN[0], users: 120, sessions: 45 },
+    { name: NEPALI_MONTHS_EN[1], users: 180, sessions: 60 },
+    { name: NEPALI_MONTHS_EN[2], users: 250, sessions: 90 },
+    { name: NEPALI_MONTHS_EN[3], users: 320, sessions: 120 },
+    { name: NEPALI_MONTHS_EN[4], users: 400, sessions: 150 },
+    { name: NEPALI_MONTHS_EN[5], users: 480, sessions: 180 },
   ];
 
   return (
@@ -102,10 +107,17 @@ function AdminDashboard() {
         <StatCard title="Total Sessions" value={stats.totalSessions || 0} icon={Calendar} color="blue" />
         <StatCard title="Completed Sessions" value={stats.completedSessions || 0} icon={Calendar} color="green" />
         <StatCard title="Average Rating" value={stats.averageRating ? Number(stats.averageRating).toFixed(1) : "N/A"} icon={Star} color="purple" />
-        <StatCard title="Total Revenue" value={`$${(stats.totalRevenue || 0).toFixed(2)}`} icon={DollarSign} color="emerald" />
+        <StatCard title="Total Revenue" value={`Rs. ${(stats.totalRevenue || 0).toFixed(2)}`} icon={DollarSign} color="emerald" />
         <StatCard title="Verified Tutors" value={stats.verifiedTutorsCount || 0} icon={UserCheck} color="green" />
         <StatCard title="Pending Verifications" value={stats.pendingVerificationsCount || 0} icon={ShieldCheck} color="amber" />
         <StatCard title="Total Reviews" value={stats.totalReviews || 0} icon={Star} color="orange" />
+        {stats.totalSlots > 0 && (
+          <>
+            <StatCard title="Available Slots" value={stats.availableSlots || 0} icon={Clock} color="emerald" />
+            <StatCard title="Booked Slots" value={stats.bookedSlots || 0} icon={Calendar} color="blue" />
+            <StatCard title="Utilization Rate" value={`${stats.slotUtilizationRate || 0}%`} icon={BarChart3} color="purple" />
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -183,6 +195,86 @@ function AdminDashboard() {
             </ResponsiveContainer>
           </div>
         </SectionCard>
+
+        {stats.monthlyRevenue && stats.monthlyRevenue.length > 0 && (
+          <SectionCard title="Monthly Revenue" subtitle="Platform earnings over time.">
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.monthlyRevenue}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                  <XAxis dataKey="month" stroke="#94A3B8" fontSize={11} />
+                  <YAxis stroke="#94A3B8" fontSize={11} />
+                  <Tooltip contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }} />
+                  <Bar dataKey="revenue" fill="#10B981" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </SectionCard>
+        )}
+
+        {stats.monthlySessions && stats.monthlySessions.length > 0 && (
+          <SectionCard title="Monthly Sessions" subtitle="Session volume over time.">
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={stats.monthlySessions}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                  <XAxis dataKey="month" stroke="#94A3B8" fontSize={11} />
+                  <YAxis stroke="#94A3B8" fontSize={11} />
+                  <Tooltip contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }} />
+                  <Area type="monotone" dataKey="sessions" stroke="#6366F1" fill="#6366F1" fillOpacity={0.2} strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </SectionCard>
+        )}
+
+        {stats.tutorPerformance && stats.tutorPerformance.length > 0 && (
+          <SectionCard title="Tutor Performance" subtitle="Top tutors by completed sessions.">
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.tutorPerformance} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                  <XAxis type="number" stroke="#94A3B8" fontSize={11} />
+                  <YAxis dataKey="name" type="category" stroke="#94A3B8" fontSize={11} width={120} />
+                  <Tooltip contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }} />
+                  <Bar dataKey="sessions" fill="#8B5CF6" radius={[0, 8, 8, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </SectionCard>
+        )}
+
+        {stats.cancellationTrend && stats.cancellationTrend.length > 0 && (
+          <SectionCard title="Cancellation Trend" subtitle="Session cancellations over time.">
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={stats.cancellationTrend}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                  <XAxis dataKey="date" stroke="#94A3B8" fontSize={11} />
+                  <YAxis stroke="#94A3B8" fontSize={11} />
+                  <Tooltip contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }} />
+                  <Line type="monotone" dataKey="cancellations" stroke="#EF4444" strokeWidth={3} dot={{ r: 4 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </SectionCard>
+        )}
+
+        {stats.peakBookingHours && stats.peakBookingHours.length > 0 && (
+          <SectionCard title="Peak Booking Hours" subtitle="Most popular booking times.">
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.peakBookingHours}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                  <XAxis dataKey="hour" stroke="#94A3B8" fontSize={11} />
+                  <YAxis stroke="#94A3B8" fontSize={11} />
+                  <Tooltip contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }} />
+                  <Bar dataKey="bookings" fill="#F59E0B" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </SectionCard>
+        )}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import PageHeader from "../../components/dashboard/PageHeader";
 import EmptyState from "../../components/dashboard/EmptyState";
 import { TableSkeleton } from "../../components/common/Skeleton";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function TutorSessions() {
   const [sessions, setSessions] = useState([]);
@@ -129,11 +130,16 @@ function TutorSessions() {
                     <strong className="text-slate-800 dark:text-slate-200">Student:</strong> {session.student?.name || "Student"}
                   </p>
                   <p>
-                    <strong className="text-slate-800 dark:text-slate-200">Date:</strong> {new Date(session.sessionDate).toLocaleDateString()}
+                    <strong className="text-slate-800 dark:text-slate-200">Date:</strong> {formatNepaliDate(new Date(session.sessionDate))}
                   </p>
                   <p>
                     <strong className="text-slate-800 dark:text-slate-200">Time Slot:</strong> {session.sessionTime}
                   </p>
+                  {session.slotId && (
+                    <p className="text-[10px] text-slate-400">
+                      Slot ID: {session.slotId._id?.toString().slice(-6)}
+                    </p>
+                  )}
                 </div>
               </div>
 

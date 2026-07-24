@@ -4,6 +4,7 @@ import { getReviews } from "../../api/adminApi";
 import PageHeader from "../../components/dashboard/PageHeader";
 import ReusableTable from "../../components/common/ReusableTable";
 import { downloadCSV } from "../../utils/exportCSV";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function AdminReviews() {
   const [reviews, setReviews] = useState([]);
@@ -56,7 +57,7 @@ function AdminReviews() {
     {
       key: "createdAt",
       label: "Date",
-      render: (val) => (val ? new Date(val).toLocaleDateString() : "—"),
+      render: (val) => (val ? formatNepaliDate(new Date(val)) : "—"),
     },
   ];
 

@@ -79,6 +79,32 @@ const tutorProfileSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    reliabilityScore: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
+    },
+
+    avgResponseTimeMinutes: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    completedSessionsCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    qualityScore: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
+    },
   },
   {
     timestamps: true,

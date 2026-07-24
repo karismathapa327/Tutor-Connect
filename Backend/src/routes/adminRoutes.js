@@ -10,6 +10,7 @@ const {
   deleteUser,
   getPendingVerifications,
   updateVerificationStatus,
+  getSchedulingStats,
 } = require("../controllers/adminController");
 
 const protect = require("../middleware/authMiddleware");
@@ -20,6 +21,7 @@ router.use(protect, authorize("admin"));
 router.get("/users", getAllUsers);
 router.get("/tutors", getAllTutors);
 router.get("/statistics", getDashboardStats);
+router.get("/scheduling/stats", getSchedulingStats);
 router.get("/sessions", getAllSessions);
 router.get("/reviews", getAllReviews);
 router.delete("/users/:id", deleteUser);

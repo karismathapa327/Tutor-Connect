@@ -20,7 +20,7 @@ const notificationRoutes = require("./src/routes/notificationRoutes");
 const favoriteRoutes = require("./src/routes/favoriteRoutes");
 const resourceRoutes = require("./src/routes/resourceRoutes");
 const paymentRoutes = require("./src/routes/paymentRoutes");
-const certificateRoutes = require("./src/routes/certificateRoutes");
+const milestoneRoutes = require("./src/routes/milestoneRoutes");
 const errorHandler = require("./src/middleware/errorMiddleware");
 
 // Load environment variables
@@ -93,7 +93,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/resources", resourceRoutes);
 app.use("/api/payments", paymentRoutes);
-app.use("/api/certificates", certificateRoutes);
+app.use("/api/milestones", milestoneRoutes);
 
 app.use(errorHandler);
 

@@ -25,6 +25,11 @@ export const getTutorById = async (id) => {
   return response.data;
 };
 
+export const getAvailableSlots = async (tutorId, date) => {
+  const response = await api.get(`/tutors/${tutorId}/slots/available`, { params: { date } });
+  return response.data;
+};
+
 export const createRequest = async (requestData) => {
   const response = await api.post("/requests", requestData);
   return response.data;
@@ -37,6 +42,11 @@ export const createReview = async (reviewData) => {
 
 export const getStudentDashboard = async () => {
   const response = await api.get("/student/dashboard");
+  return response.data;
+};
+
+export const getSuggestedTutors = async (params = {}) => {
+  const response = await api.get("/student/suggested-tutors", { params });
   return response.data;
 };
 

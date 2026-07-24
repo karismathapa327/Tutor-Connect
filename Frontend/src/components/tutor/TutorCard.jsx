@@ -1,9 +1,15 @@
 import { User, Star, BookOpen, Briefcase, Wallet, ShieldCheck, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import MatchScoreBadge from "./MatchScoreBadge";
 
 function TutorCard({ tutor, isFavorite = false, onToggleFavorite }) {
   const navigate = useNavigate();
   const isVerified = tutor?.verificationStatus === "Approved";
+
+  const matchScore = tutor?.matchScore || 0;
+  const reliabilityScore = tutor?.reliabilityScore || 0;
+  const avgResponseTime = tutor?.avgResponseTimeMinutes || 0;
+  const completedSessions = tutor?.completedSessionsCount || 0;
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200/80 dark:border-slate-800 p-6 hover:shadow-xl hover:border-indigo-200 dark:hover:border-indigo-900 transition duration-300 relative flex flex-col justify-between group">
@@ -73,6 +79,14 @@ function TutorCard({ tutor, isFavorite = false, onToggleFavorite }) {
             </span>
           ))}
         </div>
+
+        {/* Match Score */}
+        <MatchScoreBadge
+          score={matchScore}
+          reliabilityScore={reliabilityScore}
+          avgResponseTime={avgResponseTime}
+          completedSessions={completedSessions}
+        />
 
         {/* Details Metrics */}
         <div className="grid grid-cols-2 gap-3 mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/80 text-xs">

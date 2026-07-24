@@ -1,25 +1,31 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getTutorById, createRequest } from "../../api/studentApi";
 import { toast } from "react-toastify";
-import { Star, BookOpen, Briefcase, Wallet, Heart, Calendar, Clock } from "lucide-react";
+import { Star, Briefcase, Wallet, Heart, Calendar, Clock, LineChart, ShieldCheck, TrendingUp } from "lucide-react";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import PageHeader from "../../components/dashboard/PageHeader";
 import EmptyState from "../../components/dashboard/EmptyState";
+import { getTutorById, getAvailableSlots, createRequest } from "../../api/studentApi";
+import SlotPicker from "../../components/tutor/SlotPicker";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function TutorProfile() {
   const { id } = useParams();
-  const today = new Date().toISOString().split("T")[0];
   const [tutor, setTutor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
+
   const [showForm, setShowForm] = useState(false);
+  const [slots, setSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [formData, setFormData] = useState({
     subject: "",
     topic: "",
-    preferredDate: "",
-    preferredTime: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const [tutorUserId, setTutorUserId] = useState(null);
 
   useEffect(() => {
     fetchTutor();
@@ -30,6 +36,9 @@ function TutorProfile() {
       const data = await getTutorById(id);
       setTutor(data.tutor);
       setReviews(data.reviews || []);
+      if (data.tutor?.user?._id) {
+        setTutorUserId(data.tutor.user._id);
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -37,19 +46,46 @@ function TutorProfile() {
     }
   };
 
+  useEffect(() => {
+    if (!showForm || !tutorUserId) return;
+    const fetchSlots = async () => {
+      try {
+        setSlotsLoading(true);
+        setSelectedSlot(null);
+        const data = await getAvailableSlots(tutorUserId, selectedDate);
+        setSlots(data.slots || []);
+      } catch (error) {
+        console.error(error);
+        toast.error(error.response?.data?.message || "Failed to load slots.");
+      } finally {
+        setSlotsLoading(false);
+      }
+    };
+    fetchSlots();
+  }, [showForm, tutorUserId, selectedDate]);
+
+  const handleSelectSlot = (slot) => {
+    setSelectedSlot(slot);
+  };
+
   const handleSubmitRequest = async (e) => {
     e.preventDefault();
+    if (!selectedSlot) {
+      toast.error("Please select an available slot.");
+      return;
+    }
+
     try {
       setSubmitting(true);
       await createRequest({
         tutorId: tutor.user._id,
         subject: formData.subject,
         topic: formData.topic,
-        preferredDate: formData.preferredDate,
-        preferredTime: formData.preferredTime,
+        slotId: selectedSlot._id,
       });
-      toast.success("Tutoring request sent successfully!");
-      setFormData({ subject: "", topic: "", preferredDate: "", preferredTime: "" });
+      toast.success("Session requested successfully! Waiting for tutor approval.");
+      setFormData({ subject: "", topic: "" });
+      setSelectedSlot(null);
       setShowForm(false);
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to send request.");
@@ -95,6 +131,32 @@ function TutorProfile() {
           </div>
         </div>
 
+        {tutor.matchReason && (
+          <div className="mt-4 inline-flex items-start gap-2 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/40 rounded-xl px-4 py-3 text-xs text-indigo-800 dark:text-indigo-200">
+            <LineChart size={14} className="shrink-0 mt-0.5" />
+            <span>{tutor.matchReason}</span>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+          <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-4 border border-slate-100 dark:border-slate-800 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Recommendation Score</p>
+            <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400 mt-1">{tutor.matchScore || 0}%</p>
+          </div>
+          <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-4 border border-slate-100 dark:border-slate-800 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Reliability</p>
+            <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">{tutor.reliabilityScore || 0}%</p>
+          </div>
+          <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-4 border border-slate-100 dark:border-slate-800 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Quality</p>
+            <p className="text-lg font-bold text-amber-600 dark:text-amber-400 mt-1">{tutor.qualityScore || 0}%</p>
+          </div>
+          <div className="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-4 border border-slate-100 dark:border-slate-800 text-center">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Sessions</p>
+            <p className="text-lg font-bold text-slate-900 dark:text-slate-100 mt-1">{tutor.completedSessionsCount || 0}</p>
+          </div>
+        </div>
+
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-slate-100">About</h2>
           <p className="text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line">{tutor.bio}</p>
@@ -126,95 +188,84 @@ function TutorProfile() {
           </div>
         </div>
 
-        {tutor.availability && tutor.availability.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-3 text-slate-900 dark:text-slate-100">Availability</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {tutor.availability.map((slot) => (
-                <div key={slot._id} className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 border border-slate-100 dark:border-slate-800">
-                  <span className="font-medium text-slate-900 dark:text-slate-100 text-sm">{slot.day}</span>
-                  <div className="flex items-center gap-1 text-xs text-slate-600 dark:text-slate-400">
-                    <Clock size={14} />
-                    <span>
-                      {slot.startTime} - {slot.endTime}
-                    </span>
-                    {slot.isBooked && <span className="ml-2 text-rose-500 text-[10px] font-semibold uppercase">Booked</span>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         <button
           onClick={() => setShowForm(!showForm)}
           className="mt-8 w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition shadow-md shadow-indigo-600/20"
         >
-          {showForm ? "Cancel Request" : "Request Session"}
+          {showForm ? "Cancel Booking" : "Book a Session"}
         </button>
 
         {showForm && (
           <div className="mt-8 border-t border-slate-200 dark:border-slate-800 pt-8">
-            <h2 className="text-2xl font-bold mb-6 text-slate-900 dark:text-slate-100">Request a Tutoring Session</h2>
-            <form onSubmit={handleSubmitRequest} className="space-y-5 max-w-3xl">
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 font-medium mb-2">Subject</label>
-                <select
-                  value={formData.subject}
-                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  required
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            <h2 className="text-2xl font-bold mb-2 text-slate-900 dark:text-slate-100">Book a Session</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">Select a date and an available time slot to request a session.</p>
+
+            <div className="max-w-xs mb-6">
+              <label className="block text-slate-600 dark:text-slate-400 font-medium mb-2">Select Date</label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                min={new Date().toISOString().split("T")[0]}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <SlotPicker
+              slots={slots}
+              selectedSlot={selectedSlot}
+              onSelectSlot={handleSelectSlot}
+              loading={slotsLoading}
+            />
+
+            {selectedSlot && (
+              <form onSubmit={handleSubmitRequest} className="space-y-5 max-w-3xl mt-6">
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-2">Selected Slot</label>
+                  <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/40 rounded-xl px-4 py-3 text-sm text-indigo-800 dark:text-indigo-200">
+                    <Calendar size={16} />
+                    <span>
+                      {formatNepaliDate(new Date(selectedSlot.date), { format: "short" })} at {selectedSlot.startTime} - {selectedSlot.endTime}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-2">Subject</label>
+                  <select
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    required
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="">Select Subject</option>
+                    {tutor.subjects.map((subject) => (
+                      <option key={subject} value={subject}>
+                        {subject}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-2">Topic</label>
+                  <input
+                    type="text"
+                    value={formData.topic}
+                    onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
+                    required
+                    placeholder="Enter topic"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold transition shadow-md shadow-emerald-600/20 disabled:opacity-50"
                 >
-                  <option value="">Select Subject</option>
-                  {tutor.subjects.map((subject) => (
-                    <option key={subject} value={subject}>
-                      {subject}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-slate-600 dark:text-slate-400 font-medium mb-2">Topic</label>
-                <input
-                  type="text"
-                  value={formData.topic}
-                  onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
-                  required
-                  placeholder="Enter topic"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-2">Preferred Date</label>
-                  <input
-                    type="date"
-                    min={today}
-                    value={formData.preferredDate}
-                    onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
-                    required
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-600 dark:text-slate-400 font-medium mb-2">Preferred Time</label>
-                  <input
-                    type="time"
-                    value={formData.preferredTime}
-                    onChange={(e) => setFormData({ ...formData, preferredTime: e.target.value })}
-                    required
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-              </div>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold transition shadow-md shadow-emerald-600/20 disabled:opacity-50"
-              >
-                {submitting ? "Sending..." : "Send Request"}
-              </button>
-            </form>
+                  {submitting ? "Sending..." : "Confirm Booking"}
+                </button>
+              </form>
+            )}
           </div>
         )}
       </div>
@@ -230,7 +281,7 @@ function TutorProfile() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold text-slate-900 dark:text-slate-100">{review.student?.name}</h3>
-                    <p className="text-xs text-slate-400">{new Date(review.createdAt).toLocaleDateString()}</p>
+                    <p className="text-xs text-slate-400">{formatNepaliDate(new Date(review.createdAt))}</p>
                   </div>
                   <div className="flex gap-0.5">
                     {[1, 2, 3, 4, 5].map((star) => (

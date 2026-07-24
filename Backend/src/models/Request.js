@@ -26,14 +26,17 @@ const requestSchema = new mongoose.Schema(
       trim: true,
     },
 
+    slotId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Availability",
+    },
+
     preferredDate: {
       type: Date,
-      required: true,
     },
 
     preferredTime: {
       type: String,
-      required: true,
     },
 
     status: {

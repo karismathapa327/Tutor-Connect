@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Calendar, MessageSquare, Star, Search, Heart, Award, TrendingUp } from "lucide-react";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from "recharts";
-import { getStudentDashboard } from "../../api/studentApi";
-import { getFavoriteIds, getMyCertificates } from "../../api/featureApi";
+import { Calendar, MessageSquare, Star, Search, Heart, Award, TrendingUp, Clock, User, LineChart, BookOpen, Flame } from "lucide-react";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
+import { getStudentDashboard, getSessions, getSuggestedTutors } from "../../api/studentApi";
+import { getFavoriteIds, getMyMilestones } from "../../api/featureApi";
 import StatCard from "../../components/dashboard/StatCard";
 import PageHeader from "../../components/dashboard/PageHeader";
 import QuickActions from "../../components/dashboard/QuickActions";
@@ -10,13 +10,17 @@ import SectionCard from "../../components/dashboard/SectionCard";
 import EmptyState from "../../components/dashboard/EmptyState";
 import { CardSkeleton } from "../../components/common/Skeleton";
 import { studentActions } from "../../mock/dashboard/studentData";
+import TutorCard from "../../components/tutor/TutorCard";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 const COLORS = ["#6366F1", "#10B981", "#EF4444", "#F59E0B"];
 
 function StudentDashboard() {
   const [stats, setStats] = useState(null);
+  const [upcomingSessionsList, setUpcomingSessionsList] = useState([]);
+  const [suggestedTutors, setSuggestedTutors] = useState([]);
   const [favoriteCount, setFavoriteCount] = useState(0);
-  const [certCount, setCertCount] = useState(0);
+  const [milestoneCount, setMilestoneCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,14 +30,19 @@ function StudentDashboard() {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      const data = await getStudentDashboard();
-      setStats(data);
+      const [dashboardData, sessionsData] = await Promise.all([
+        getStudentDashboard(),
+        getSessions({ status: "Upcoming" }).catch(() => ({ sessions: [] })),
+      ]);
+      setStats(dashboardData);
+      setUpcomingSessionsList(sessionsData.sessions || []);
+      setSuggestedTutors(dashboardData.recommendedTutors || []);
 
       const favData = await getFavoriteIds();
       setFavoriteCount(favData.favoriteIds?.length || 0);
 
-      const certData = await getMyCertificates();
-      setCertCount(certData.certificates?.length || 0);
+      const milestoneData = await getMyMilestones();
+      setMilestoneCount(milestoneData.milestones?.filter((m) => m.achieved).length || 0);
     } catch (error) {
       console.error(error);
     } finally {
@@ -74,6 +83,10 @@ function StudentDashboard() {
           <StatCard title="Upcoming Sessions" value={stats?.upcomingSessions || 0} icon={Calendar} color="blue" />
           <StatCard title="Completed Sessions" value={stats?.completedSessions || 0} icon={TrendingUp} color="green" />
           <StatCard title="Saved Favorites" value={favoriteCount} icon={Heart} color="purple" />
+          <StatCard title="Learning Hours" value={stats?.learningHours || 0} icon={Clock} color="emerald" />
+          <StatCard title="Milestones" value={stats?.milestoneCount || milestoneCount} icon={Flame} color="amber" />
+          <StatCard title="Learning Streak" value={`${stats?.learningStreak || 0} days`} icon={Flame} color="orange" />
+          <StatCard title="Reviews Given" value={stats?.reviewsGiven || 0} icon={Star} color="pink" />
         </div>
       )}
 
@@ -120,40 +133,131 @@ function StudentDashboard() {
         </div>
       )}
 
+      {/* Weekly Progress */}
+      {stats?.weeklyProgress && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+            <TrendingUp size={16} className="text-indigo-600 dark:text-indigo-400" /> Weekly Progress
+          </h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={stats.weeklyProgress}>
+                <XAxis dataKey="day" stroke="#94A3B8" fontSize={11} />
+                <YAxis stroke="#94A3B8" fontSize={11} />
+                <Tooltip contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)" }} />
+                <Area type="monotone" dataKey="sessions" stroke="#6366F1" fill="#6366F1" fillOpacity={0.2} strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
       <QuickActions actions={studentActions} />
+
+      {/* Suggested Tutors */}
+      <div className="mt-6">
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">Suggested Tutors</h2>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
+          Tutors matched to your search filters and platform activity.
+        </p>
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-slate-200 dark:bg-slate-800 rounded-2xl h-64 w-full" />
+            ))}
+          </div>
+        ) : suggestedTutors.length === 0 ? (
+          <SectionCard title="No Suggestions Yet" subtitle="Adjust your filters to discover more tutors.">
+            <EmptyState
+              icon={Search}
+              title="No Suggestions"
+              description="Try broadening your filters to discover more tutors."
+              buttonText="Find Tutors"
+              buttonLink="/student/tutors"
+            />
+          </SectionCard>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+             {suggestedTutors.map((tutor) => (
+              <TutorCard
+                key={tutor._id}
+                tutor={tutor}
+                isFavorite={false}
+                onToggleFavorite={undefined}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
         <SectionCard title="Upcoming Sessions" subtitle="Your upcoming scheduled tutoring sessions.">
-          <EmptyState
-            icon={Calendar}
-            title="No Upcoming Sessions"
-            description="You haven't booked any tutoring sessions yet."
-            buttonText="Find Tutors"
-            buttonLink="/student/tutors"
-          />
+          {loading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="animate-pulse bg-slate-200 dark:bg-slate-800 rounded-xl h-16 w-full" />
+              ))}
+            </div>
+          ) : upcomingSessionsList.length === 0 ? (
+            <EmptyState
+              icon={Calendar}
+              title="No Upcoming Sessions"
+              description="You haven't booked any tutoring sessions yet."
+              buttonText="Find Tutors"
+              buttonLink="/student/tutors"
+            />
+          ) : (
+            <div className="space-y-3">
+              {upcomingSessionsList.map((session) => (
+                <div key={session._id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <div>
+                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      <User size={14} className="text-indigo-500" />
+                      {session.tutor?.name || "Tutor"}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-slate-600 dark:text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <Calendar size={12} />
+                        {formatNepaliDate(new Date(session.sessionDate))}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} />
+                        {session.sessionTime}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{session.subject}</p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border-amber-200">
+                    Waiting
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </SectionCard>
 
-        <SectionCard title="Certificates Earned" subtitle="Milestone certificates issued to you.">
-          {certCount > 0 ? (
+        <SectionCard title="Milestones" subtitle="Achievements unlocked through your learning journey.">
+          {(stats?.milestoneCount || milestoneCount) > 0 ? (
             <div className="p-6 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-200 dark:border-amber-900/40 rounded-2xl flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Award className="text-amber-500" size={32} />
+                <Flame className="text-amber-500" size={32} />
                 <div>
-                  <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Official Milestone Certificates</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">You have earned {certCount} downloadable certificate(s).</p>
+                  <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Achievements Unlocked</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">You have earned {stats?.milestoneCount || milestoneCount} milestone(s).</p>
                 </div>
               </div>
-              <a href="/student/certificates" className="px-4 py-2 bg-amber-500 text-white font-bold text-xs rounded-xl hover:bg-amber-600 transition">
+              <a href="/student/milestones" className="px-4 py-2 bg-amber-500 text-white font-bold text-xs rounded-xl hover:bg-amber-600 transition">
                 View All
               </a>
             </div>
           ) : (
             <EmptyState
-              icon={Award}
-              title="No Certificates Yet"
-              description="Complete tutoring sessions with tutors to earn downloadable PDF certificates."
-              buttonText="View Sessions"
-              buttonLink="/student/sessions"
+              icon={Flame}
+              title="No Milestones Yet"
+              description="Complete sessions, leave reviews, and stay consistent to unlock milestones."
+              buttonText="Find Tutors"
+              buttonLink="/student/tutors"
             />
           )}
         </SectionCard>

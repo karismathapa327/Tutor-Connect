@@ -4,6 +4,7 @@ import PageHeader from "../../components/dashboard/PageHeader";
 import ReusableTable from "../../components/common/ReusableTable";
 import { CalendarDays, Search } from "lucide-react";
 import { downloadCSV } from "../../utils/exportCSV";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function AdminSessions() {
   const [sessions, setSessions] = useState([]);
@@ -55,7 +56,7 @@ function AdminSessions() {
     {
       key: "sessionDate",
       label: "Date",
-      render: (val) => (val ? new Date(val).toLocaleDateString() : "—"),
+      render: (val) => (val ? formatNepaliDate(new Date(val)) : "—"),
     },
     { key: "sessionTime", label: "Time" },
     {

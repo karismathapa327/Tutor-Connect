@@ -66,13 +66,13 @@ export const getAllPayments = async () => {
   return response.data;
 };
 
-// CERTIFICATES API
-export const getMyCertificates = async () => {
-  const response = await api.get("/certificates");
+// MILESTONES API
+export const getMyMilestones = async () => {
+  const response = await api.get("/milestones");
   return response.data;
 };
 
-export const generateCertificate = async (data) => {
-  const response = await api.post("/certificates/generate", data);
+export const checkMilestones = async () => {
+  const response = await api.post("/milestones/check");
   return response.data;
 };

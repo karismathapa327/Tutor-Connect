@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/dashboard/PageHeader";
@@ -6,6 +6,7 @@ import { getStudentProfile } from "../../api/studentApi";
 import { changePassword } from "../../api/authApi";
 import useAuth from "../../hooks/useAuth";
 import { User, Lock, LogOut } from "lucide-react";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function StudentSettings() {
   const navigate = useNavigate();
@@ -18,8 +19,11 @@ function StudentSettings() {
     newPassword: "",
     confirmPassword: "",
   });
+  const fetched = useRef(false);
 
   useEffect(() => {
+    if (fetched.current) return;
+    fetched.current = true;
     fetchProfile();
   }, []);
 
@@ -106,7 +110,7 @@ function StudentSettings() {
           <div>
             <p className="text-slate-500 dark:text-slate-400 text-sm">Member Since</p>
             <h3 className="font-semibold text-lg text-slate-900 dark:text-slate-100">
-              {new Date(profile.createdAt).toLocaleDateString()}
+              {formatNepaliDate(new Date(profile.createdAt))}
             </h3>
           </div>
         </div>

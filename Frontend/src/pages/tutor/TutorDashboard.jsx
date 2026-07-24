@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Calendar, CalendarCheck, MessageSquare, Star, TrendingUp, ShieldCheck } from "lucide-react";
+import { Calendar, CalendarCheck, MessageSquare, Star, TrendingUp, ShieldCheck, Clock, BarChart3 } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
-import { getTutorDashboard } from "../../api/tutorApi";
+import { getTutorDashboard, getTutorSlotStats } from "../../api/tutorApi";
 import PageHeader from "../../components/dashboard/PageHeader";
 import StatCard from "../../components/dashboard/StatCard";
 import QuickActions from "../../components/dashboard/QuickActions";
@@ -9,9 +9,11 @@ import SectionCard from "../../components/dashboard/SectionCard";
 import EmptyState from "../../components/dashboard/EmptyState";
 import { CardSkeleton } from "../../components/common/Skeleton";
 import { tutorActions } from "../../mock/dashboard/tutorData";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function TutorDashboard() {
   const [dashboard, setDashboard] = useState(null);
+  const [slotStats, setSlotStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,8 +23,12 @@ function TutorDashboard() {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      const data = await getTutorDashboard();
-      setDashboard(data);
+      const [dashData, slotsData] = await Promise.all([
+        getTutorDashboard(),
+        getTutorSlotStats().catch(() => ({})),
+      ]);
+      setDashboard(dashData);
+      setSlotStats(slotsData);
     } catch (error) {
       console.error(error);
     } finally {
@@ -49,11 +55,16 @@ function TutorDashboard() {
           <CardSkeleton />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
           <StatCard title="Pending Requests" value={dashboard?.pendingRequests || 0} icon={MessageSquare} color="yellow" />
           <StatCard title="Upcoming Sessions" value={dashboard?.upcomingSessions || 0} icon={Calendar} color="blue" />
           <StatCard title="Completed Sessions" value={dashboard?.completedSessions || 0} icon={CalendarCheck} color="green" />
           <StatCard title="Average Rating" value={dashboard?.averageRating ? dashboard.averageRating.toFixed(1) : "N/A"} icon={Star} color="purple" />
+          <StatCard title="Reliability Score" value={`${dashboard?.reliabilityScore || 0}%`} icon={ShieldCheck} color="emerald" />
+          <StatCard title="Quality Score" value={`${dashboard?.qualityScore || 0}%`} icon={TrendingUp} color="blue" />
+          <StatCard title="Acceptance Rate" value={`${dashboard?.acceptanceRate || 0}%`} icon={MessageSquare} color="green" />
+          <StatCard title="Monthly Earnings" value={`Rs. ${(dashboard?.monthlyEarnings || 0).toFixed(2)}`} icon={TrendingUp} color="amber" />
+          <StatCard title="Response Time" value={`${dashboard?.avgResponseTimeMinutes || 0}m`} icon={Clock} color="orange" />
         </div>
       )}
 
@@ -108,7 +119,7 @@ function TutorDashboard() {
                 <div key={session._id} className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
                   <div>
                     <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{session.student?.name}</h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{session.subject} • {new Date(session.sessionDate).toLocaleDateString()}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{session.subject} • {formatNepaliDate(new Date(session.sessionDate))}</p>
                   </div>
                   <a href="/tutor/sessions" className="px-3 py-1.5 bg-emerald-600 text-white font-semibold text-xs rounded-lg hover:bg-emerald-700 transition">
                     Manage

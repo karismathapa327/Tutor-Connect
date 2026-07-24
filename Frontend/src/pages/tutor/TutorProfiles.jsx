@@ -4,6 +4,7 @@ import StatCard from "../../components/dashboard/StatCard";
 import { Star, MessageSquare, CalendarCheck, CheckCircle2 } from "lucide-react";
 import { getTutorProfile, updateTutorProfile, createTutorProfile } from "../../api/tutorApi";
 import { toast } from "react-toastify";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function TutorProfiles() {
   const [profile, setProfile] = useState(null);
@@ -282,7 +283,7 @@ function TutorProfiles() {
           <div>
             <p className="text-gray-500">Member Since</p>
             <h3 className="font-semibold text-lg">
-              {profile.memberSince ? new Date(profile.memberSince).toLocaleDateString() : "N/A"}
+              {formatNepaliDate(new Date(profile.memberSince))}
             </h3>
           </div>
         </div>

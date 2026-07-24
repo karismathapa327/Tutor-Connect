@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import PageHeader from "../components/dashboard/PageHeader";
 import EmptyState from "../components/dashboard/EmptyState";
 import { TableSkeleton } from "../components/common/Skeleton";
+import { formatNepaliDate } from "../utils/dateUtils";
 
 function Notifications() {
   const [notifications, setNotifications] = useState([]);
@@ -150,7 +151,7 @@ function Notifications() {
                       <div className="flex items-center justify-between gap-2">
                         <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">{n.title}</p>
                         <span className="text-[10px] text-slate-400 whitespace-nowrap">
-                          {new Date(n.createdAt).toLocaleDateString()}
+                          {formatNepaliDate(new Date(n.createdAt))}
                         </span>
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">{n.message}</p>

@@ -2,16 +2,16 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  getMyCertificates,
-  generateCertificate,
-} = require("../controllers/certificateController");
+  getMyMilestones,
+  checkMilestones,
+} = require("../controllers/milestoneController");
 
 const protect = require("../middleware/authMiddleware");
 const authorize = require("../middleware/roleMidlleware");
 
 router.use(protect, authorize("student"));
 
-router.get("/", getMyCertificates);
-router.post("/generate", generateCertificate);
+router.get("/", getMyMilestones);
+router.post("/check", checkMilestones);
 
 module.exports = router;

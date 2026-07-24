@@ -4,6 +4,7 @@ import { getRequests } from "../../api/studentApi";
 import PageHeader from "../../components/dashboard/PageHeader";
 import EmptyState from "../../components/dashboard/EmptyState";
 import { TableSkeleton } from "../../components/common/Skeleton";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function StudentRequests() {
   const [requests, setRequests] = useState([]);
@@ -87,7 +88,7 @@ function StudentRequests() {
                     <td className="p-4 text-slate-700 dark:text-slate-300">{request.subject}</td>
                     <td className="p-4 text-slate-600 dark:text-slate-400">{request.topic}</td>
                     <td className="p-4 text-slate-600 dark:text-slate-400 font-mono">
-                      {new Date(request.preferredDate).toLocaleDateString()}
+                      {formatNepaliDate(new Date(request.preferredDate))}
                     </td>
                     <td className="p-4 text-slate-600 dark:text-slate-400">{request.preferredTime}</td>
                     <td className="p-4 text-center">{getStatusBadge(request.status)}</td>

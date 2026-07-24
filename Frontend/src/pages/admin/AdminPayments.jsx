@@ -3,6 +3,7 @@ import { DollarSign, TrendingUp, CreditCard, Search } from "lucide-react";
 import { getAllPayments } from "../../api/featureApi";
 import EmptyState from "../../components/dashboard/EmptyState";
 import { TableSkeleton } from "../../components/common/Skeleton";
+import { formatNepaliDate } from "../../utils/dateUtils";
 
 function AdminPayments() {
   const [payments, setPayments] = useState([]);
@@ -50,7 +51,7 @@ function AdminPayments() {
           <div className="flex items-center gap-2 text-emerald-100 text-xs font-medium uppercase tracking-wide">
             <TrendingUp size={16} /> Total Revenue
           </div>
-          <div className="text-3xl font-extrabold mt-2">${totalRevenue.toFixed(2)}</div>
+          <div className="text-3xl font-extrabold mt-2">Rs. {totalRevenue.toFixed(2)}</div>
           <p className="text-emerald-100 text-[11px] mt-1">Across {payments.length} transactions</p>
         </div>
 
@@ -114,7 +115,7 @@ function AdminPayments() {
                     <td className="p-4 font-mono font-semibold text-slate-900 dark:text-slate-100">{p.transactionId}</td>
                     <td className="p-4 font-medium text-slate-800 dark:text-slate-200">{p.student?.name || "N/A"}</td>
                     <td className="p-4 font-medium text-slate-800 dark:text-slate-200">{p.tutor?.name || "N/A"}</td>
-                    <td className="p-4 font-extrabold text-slate-900 dark:text-slate-100 text-sm">${p.amount.toFixed(2)}</td>
+                    <td className="p-4 font-extrabold text-slate-900 dark:text-slate-100 text-sm">Rs. {p.amount.toFixed(2)}</td>
                     <td className="p-4">
                       <span
                         className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase border ${
@@ -128,7 +129,7 @@ function AdminPayments() {
                         {p.status}
                       </span>
                     </td>
-                    <td className="p-4 text-right text-slate-400 font-mono">{new Date(p.createdAt).toLocaleDateString()}</td>
+                    <td className="p-4 text-right text-slate-400 font-mono">{formatNepaliDate(new Date(p.createdAt))}</td>
                   </tr>
                 ))}
               </tbody>
